@@ -1,0 +1,28 @@
+Package: RNAseqCovarImpute
+Title: Impute Covariate Data in RNA Sequencing Studies
+Version: 0.99.0
+Authors@R: 
+    person("Brennan", "Baker", , "brennanhilton@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-5459-9141"))
+Description: The RNAseqCovarImpute package imputes missing values of covariates using the following procedure: 1) Randomly bin genes into smaller groups. 2) Perform multiple imputation using the first bin of genes plus all other covariates in the predictor matrix to create N imputed datasets. 3) Perform differential gene expression analysis using the limma-voom pipeline on only the genes in this particular bin. The analysis is run on all N imputed data sets separately. 4) Repeat steps 2 and 3 for all other gene bins. 5) Pool results with Rubins’ rules to produce combined coefficients, combined standard errors, and P-values. Adjust P-values for false discovery rate. 
+License: GPL (>= 3)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+VignetteBuilder: knitr
+biocViews: RNASeq, GeneExpression, DifferentialExpression, Sequencing
+Suggests: BiocStyle, knitr, rmarkdown, tidyr, stringr
+Imports:
+    Biobase,
+    stats,
+    methods,
+    graphics,
+    limma,
+    dplyr,
+    magrittr,
+    rlang,
+    doParallel,
+    edgeR,
+    foreach,
+    mice,
+    parallel
