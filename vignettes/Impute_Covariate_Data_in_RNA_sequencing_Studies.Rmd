@@ -15,11 +15,20 @@ editor_options:
   chunk_output_type: console
 ---
 
-# Background
+# Introduction
 
 Missing data is a common problem in observational studies, as modeling techniques such as linear regression cannot be fit to data with missing points. Missing data is frequently dealt with using complete case analyses in which any individuals with missing data are dropped from the study. Dropping participants can reduce statistical power and, in some cases, result in biased model estimates. A common technique to address these problems is to replace or 'impute' missing data points with substituted values. Typically, for a given covariate, missing data points are imputed using a prediction model including other relevant covariates and the outcome of interest as independent variables. Rather than replacing a missing data point with one predicted value, multiple imputation generates several predictions, thereby allowing for uncertainty about the missing data. In a typical multiple imputation procedure: 1) N imputed data sets are created, 2) each data set is analyzed separately (e.g., using linear regression), and 3) estimates and standard errors across the N analyses are pooled using Rubin's rules. 
 
 Research has shown that outcome information should be included in the predictive models to avoid biased estimates. This can be problematic in 'omics' studies with high dimensional outcome data. Fitting an imputation model where the number of independent variables is far greater than the number of individuals in the study is generally not possible. For instance, in RNA sequencing studies with upwards of 20,000 genes, far more than 20,000 participants would be needed in order to apply a standard multiple imputation procedure. Missing values can be imputed separately for each outcome variable, but that would require making upwards of 20,000 multiply imputed data sets (one set for each gene outcome). This computational inefficiency can be addressed by binning genes into smaller groups (e.g., bins with 1 gene per every 10 individual in the study). 
+
+# Installation
+
+```{r, eval=FALSE}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("RNAseqCovarImpute")
+```
 
 # RNAseqCovarImpute Demonstration
 

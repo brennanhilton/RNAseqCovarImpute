@@ -33,23 +33,23 @@ Dataframe with one row per gene containing coefficients standard errors, degrees
 Combines results from each imputed dataset using Rubin's rules.
 }
 \examples{
-intervals <- get_gene_bin_intervals(DGE, data, n = 10)
-gene_bin_impute <- impute_by_gene_bin(data,
+intervals <- get_gene_bin_intervals(example_DGE, example_data, n = 10)
+gene_bin_impute <- impute_by_gene_bin(example_data,
     intervals,
-    DGE,
-    n = 3
+    example_DGE,
+    n = 2
 )
 coef_se <- limmavoom_imputed_data_list(
     gene_intervals = intervals,
-    DGE = DGE,
+    DGE = example_DGE,
     imputed_data_list = gene_bin_impute,
-    n = 3,
+    n = 2,
     voom_formula = "~x + y + z + a + b",
     predictor = "x"
 )
 
 final_res <- combine_rubins(
-    DGE = DGE,
+    DGE = example_DGE,
     model_results = coef_se,
     voom_formula = "~x + y + z + a + b"
 )
