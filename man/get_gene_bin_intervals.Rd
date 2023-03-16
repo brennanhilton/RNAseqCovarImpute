@@ -23,6 +23,7 @@ genes per bin are set so that each bin has approximately 1 gene per
 10 individuals in the data.
 }
 \examples{
+data(RNAseqCovarImpute_data)
 intervals <- get_gene_bin_intervals(example_DGE, example_data, n = 10)
 gene_bin_impute <- impute_by_gene_bin(example_data,
     intervals,

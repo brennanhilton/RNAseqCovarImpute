@@ -30,6 +30,7 @@
 #' @importFrom dplyr left_join
 #'
 #' @examples
+#' data(RNAseqCovarImpute_data)
 #' intervals <- get_gene_bin_intervals(example_DGE, example_data, n = 10)
 #' gene_bin_impute <- impute_by_gene_bin(example_data,
 #'     intervals,

@@ -13,6 +13,8 @@
 #' \item{example_DGE}{random count data for 500 made up genes in a DGElist}
 #' ...
 #' }
+#' @docType data
+#' @keywords datasets
 #' @name RNAseqCovarImpute_data
 #' @usage data(RNAseqCovarImpute_data)
 #' @format Two objects: A data frame with 500 rows and 5 variables and A DGElist with 500 genes and 500 samples
