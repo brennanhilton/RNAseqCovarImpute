@@ -14,7 +14,7 @@ data(RNAseqCovarImpute_data)
 I created the \code{RNAseqCovarImpute_data} dataset to show how to use the package functions.
 The exact code used to generate these data are found in the Example_Data_for_RNAseqCovarImpute
 vignette. In short, \code{example_data} contains 500 rows with data for variables x, y, and z, which
-are continuous normally distributed, and x and y, which are binary variables. Missigness
+are continuous normally distributed, and a and b, which are binary variables. Missigness
 was simulated for all variables other than x such that a complete case analysis would drop
 24.2\% of participants. \code{example_DGE} contains random count data from the Poisson distribution
 for 500 made up genes, ENS1-ENS500

@@ -24,114 +24,46 @@ Research has shown that outcome information should be included in the predictive
 # Installation
 
 ```{r, eval=FALSE}
+# Install from github
+library(devtools)
+install_github("brennanhilton/RNAseqCovarImpute")
+
+# Install from Bioconductor
+
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
 BiocManager::install("RNAseqCovarImpute")
 ```
 
+# Generate random data with missing covariate data
+
+Normally you would have your own covariate and RNA-sequencing data. We generated random data for the purpose of this demonstration. The exact code used to generate these data are found in the [Example Data for RNAseqCovarImpute](Example_Data_for_RNAseqCovarImpute.html) vignette. In short, `example_data` contains 500 rows with data for variables x, y, and z, which are continuous normally distributed, and a and b, which are binary variables. Missigness was simulated for all variables other than x such that a complete case analysis would drop 24.2% of participants. `example_DGE` contains random count data from the Poisson distribution for 500 made up genes, ENS1-ENS500
+```{r message=FALSE, warning=FALSE}
+library(RNAseqCovarImpute)
+library(dplyr)
+data(RNAseqCovarImpute_data)
+```
+
 # RNAseqCovarImpute Demonstration
 
 This package contains functions for imputing covariate data in RNA sequencing studies and conducting differential expression analysis using the limma-voom pipeline. The procedure is outlined below:
 
-1: Bin the genes into smaller groups (around 1 gene per 10 individuals in the study). For example, with 880 individuals we make bins of 88 genes.
+1: Bin the genes into smaller groups. The default is approximately 1 gene per 10 individuals in the study, but the user can specify a different ratio. For example, in a study with 500 participants and 10,000 genes, 200 bins of 50 genes would be created using the default ratio. When the total number of genes is not divisible by the bin size, the method flexibly creates bins of two different sizes. For example, if the same hypothetical study included 10,001 genes, 199 bins of 50 and 1 bin of 51 genes would be created. 
 
 2: Use the first bin of genes plus all user-specified covariates in the predictor matrix to make N imputed data sets (using ‘mice’ R package).
 
-3: Run RNA-seq analysis on only the genes in this particular bin. The analysis is run on all N imputed data sets separately. The coefficients and standard errors are then combined with Rubin's rules and P-values computed for this particular bin of genes.
+3: Run RNA-seq analysis on only the genes in this particular bin. The analysis is run on all N imputed data sets separately.
 
 4: Repeat steps 2 and 3 for all other gene bins.
 
-5: Combine results for all gene bins and compute FDR adjusted P-values.
-
-## Generate random data with missing covariate data
-
-Normally you would have your own covariate and RNA-sequencing data. We generate random data below for the purpose of this demonstration.
-```{r, message=FALSE, warning=FALSE, eval = requireNamespace(c("stringr", "tidyr"))}
-library(dplyr)
-library(stringr)
-library(tidyr)
-library(edgeR)
-library(mice)
-library(RNAseqCovarImpute)
-# Generate random covariate data
-set.seed(2023)
-x1 <- rnorm(n = 500)
-y1 <- rnorm(n = 500)
-z1 <- rnorm(n = 500)
-a1 <- rbinom(n = 500, prob = .25, size = 1)
-b1 <- rbinom(n = 500, prob = .5, size = 1)
-data <- data.frame(x = x1, y = y1, z = z1, a = a1, b = b1)
-
-# Generate random count data
-nsamp <- nrow(data)
-ngene <- 500
-mat <- matrix(stats::rpois(n = nsamp * ngene, lambda = sample(1:500, ngene, replace = TRUE)),
-    nrow = ngene,
-    ncol = nsamp
-)
-
-# Make fake ENSEMBL gene numbers
-annot <- tibble(number = seq_len(ngene), name1 = "ENS") %>%
-    mutate(ENSEMBL = str_c(name1, number)) %>%
-    dplyr::select(ENSEMBL)
-rownames(mat) <- annot$ENSEMBL
-
-# Make DGE list and set rownames to ENSEMBL gene numbers above
-alldg_full <- DGEList(mat, genes = annot)
-rownames(alldg_full) <- annot$ENSEMBL
-
-# With real data, you would likely want to filter out low count genes and normalize to library size
-# keep <- rowMeans(cpm(alldg_full, log = TRUE)) > 0
-# alldg_full <- alldg_full[keep, , keep.lib.sizes = FALSE]
-# alldg_full <- calcNormFactors(alldg_full)
-```
-
-Now we simulate missingness in the random data generated above using the mice ampute function. The below code simulates missingness in the data for all but the first variable (x), which we consider the main predictor of interest in this example. See the ampute documentation for more details. 
-```{r, message=FALSE, warning=FALSE}
-# First get all combos of 0 or 1 for the 4 other variables (y, z, a, and b)
-pattern_vars <- expand.grid(c(0,1), c(0,1), c(0,1), c(0,1))
-# Then add back a column for the predictor of interest, which is never amputed, so the first col =1 the whole way down
-pattern2 <- matrix(1, nrow = nrow(pattern_vars), ncol = 1)
-pattern1 <- cbind(pattern2, pattern_vars)
-# Remove last row which is all 1s (all 1s means no missingness induced)
-pattern <- pattern1[seq_len(15), ]
-
-# Specify proportion of missing data and missingness mechanism for the ampute function
-prop_miss <- 25
-miss_mech <- "MAR"
-result <- ampute(data = data, prop = prop_miss, mech = miss_mech, patterns = pattern)
-
-# Extract the missing data
-ampute_i <- result$amp
-# Ampute function turns factors to numeric, so convert back to factors
-ampute_i <- ampute_i %>% mutate(
-    a = as.factor(a),
-    b = as.factor(b)
-)
-
-# Calculate the new sample size if NAs are dropped as in a complete case analysis
-sample_size <- ampute_i %>%
-    drop_na() %>%
-    nrow()
-
-# As shown below, we have 24.2% missingness.
-100 * (nsamp - sample_size) / nsamp
-```
-
-
-```{r, message=FALSE, warning=FALSE, echo=FALSE}
-ampute_i %>%
-    head(10) %>%
-    knitr::kable(digits = 3, caption = "The first 10 rows of simulated covariate data with missingness")
-```
-
+5: Pool results with Rubins’ rules to produce combined coefficients, combined standard errors, and P-values. Adjust P-values for false discovery rate (FDR).
 
 ## 1: Bin the genes into smaller groups
 The get_gene_bin_intervals function returns a data frame of intervals that can be used to bin the DGE list. By default, number of bins and genes per bin are set so that each bin has approximately 1 gene per 10 individuals/samples in the data. The default gene bin size can be changed with the n argument.
 
 ```{r, message=FALSE, warning=FALSE}
-intervals <- get_gene_bin_intervals(alldg_full, ampute_i, n = 10)
+intervals <- get_gene_bin_intervals(example_DGE, example_data, n = 10)
 ```
 
 ```{r, message=FALSE, warning=FALSE, echo=FALSE}
@@ -144,20 +76,19 @@ Our goal is to bin genes randomly, so we must randomize the order of the genes i
 
 ```{r, message=FALSE, warning=FALSE}
 # Randomize the order of gene identifiers
+annot <- example_DGE$genes
 annot <- annot[sample(seq_len(nrow(annot))), ]
-# Match order of the genes in the counts table to the randomized order of genes in the annotation
-mat <- mat[annot$ENSEMBL, ]
-# Recreate a DGE list with randomized order of genes
-alldg_full <- DGEList(mat, genes = annot)
+# Match order of the genes in the DGE to the randomized order of genes in the annotation
+example_DGE <- example_DGE[annot, ]
 ```
 
 ## 2-4: Make imputed data sets for each bin of genes and conduct differential expression analysis
 
 The impute_by_gene_bin function loops through a DGE list using the gene bin intervals from the "get_gene_bin_intervals" function. It returns a list of sets of n imputed datasets, one per gene bin. For instance, if n = 100 and intervals contains 200 gene bin intervals, output will be a list of 200 sets of 100 imputed datasets. Each of the 200 sets are imputed using only the genes in one gene bin. This same procedure can be run more quickly in parallel with the impute_by_gene_bin_parallel function, which uses the 'PSOCK' backend implemented via the doParallel package.
 ```{r, message=FALSE, warning=FALSE, results = 'hide'}
-gene_bin_impute <- impute_by_gene_bin(ampute_i,
+gene_bin_impute <- impute_by_gene_bin(example_data,
     intervals,
-    alldg_full,
+    example_DGE,
     n = 3
 )
 ```
@@ -166,7 +97,7 @@ The limmavoom_imputed_data_list function loops through the imputed data list (ou
 ```{r, message=FALSE, warning=FALSE}
 coef_se <- limmavoom_imputed_data_list(
     gene_intervals = intervals,
-    DGE = alldg_full,
+    DGE = example_DGE,
     imputed_data_list = gene_bin_impute,
     n = 3,
     voom_formula = "~x + y + z + a + b",
@@ -178,7 +109,7 @@ coef_se <- limmavoom_imputed_data_list(
 The final step is to combine the results from each imputed dataset using Rubin's rules. The argument "model_results" is the output from the "limmavoom_imputed_data_list" function above. The result is a table with one row per gene. The table includes coefficients (e.g., logFC values) standard errors, degrees of freedom, t-statistics, P-Values, and adjusted P-values from the limma-voom pipeline. Both the raw and empirical Bayes moderated statistics are reported (see limma package for details). 
 ```{r, message=FALSE, warning=FALSE}
 final_res <- combine_rubins(
-    DGE = alldg_full,
+    DGE = example_DGE,
     model_results = coef_se,
     voom_formula = "~x + y + z + a + b"
 )
