@@ -17,7 +17,7 @@ editor_options:
 
 # Introduction
 
-Missing data is a common problem in observational studies, as modeling techniques such as linear regression cannot be fit to data with missing points. Missing data is frequently dealt with using complete case analyses in which any individuals with missing data are dropped from the study. Dropping participants can reduce statistical power and, in some cases, result in biased model estimates. A common technique to address these problems is to replace or 'impute' missing data points with substituted values. Typically, for a given covariate, missing data points are imputed using a prediction model including other relevant covariates and the outcome of interest as independent variables. Rather than replacing a missing data point with one predicted value, multiple imputation generates several predictions, thereby allowing for uncertainty about the missing data. In a typical multiple imputation procedure: 1) N imputed data sets are created, 2) each data set is analyzed separately (e.g., using linear regression), and 3) estimates and standard errors across the N analyses are pooled using Rubin's rules. 
+Missing data is a common problem in observational studies, as modeling techniques such as linear regression cannot be fit to data with missing points. Missing data is frequently dealt with using complete case analyses in which any individuals with missing data are dropped from the study. Dropping participants can reduce statistical power and, in some cases, result in biased model estimates. A common technique to address these problems is to replace or 'impute' missing data points with substituted values. Typically, for a given covariate, missing data points are imputed using a prediction model including other relevant covariates and the outcome of interest as independent variables. Rather than replacing a missing data point with one predicted value, multiple imputation generates several predictions, thereby allowing for uncertainty about the missing data. In a typical multiple imputation procedure: 1) M imputed data sets are created, 2) each data set is analyzed separately (e.g., using linear regression), and 3) estimates and standard errors across the M analyses are pooled using Rubin's rules. 
 
 Research has shown that outcome information should be included in the predictive models to avoid biased estimates. This can be problematic in 'omics' studies with high dimensional outcome data. Fitting an imputation model where the number of independent variables is far greater than the number of individuals in the study is generally not possible. For instance, in RNA sequencing studies with upwards of 20,000 genes, far more than 20,000 participants would be needed in order to apply a standard multiple imputation procedure. Missing values can be imputed separately for each outcome variable, but that would require making upwards of 20,000 multiply imputed data sets (one set for each gene outcome). This computational inefficiency can be addressed by binning genes into smaller groups (e.g., bins with 1 gene per every 10 individual in the study). 
 
@@ -47,20 +47,22 @@ data(RNAseqCovarImpute_data)
 
 # RNAseqCovarImpute Demonstration
 
-This package contains functions for imputing covariate data in RNA sequencing studies and conducting differential expression analysis using the limma-voom pipeline. The procedure is outlined below:
+The RNAseqCovarImpute package implements multiple imputation of missing covariates and differential gene expression analysis by:
 
-1: Bin the genes into smaller groups. The default is approximately 1 gene per 10 individuals in the study, but the user can specify a different ratio. For example, in a study with 500 participants and 10,000 genes, 200 bins of 50 genes would be created using the default ratio. When the total number of genes is not divisible by the bin size, the method flexibly creates bins of two different sizes. For example, if the same hypothetical study included 10,001 genes, 199 bins of 50 and 1 bin of 51 genes would be created. 
+1: randomly binning genes into smaller groups
 
-2: Use the first bin of genes plus all user-specified covariates in the predictor matrix to make N imputed data sets (using ‘mice’ R package).
+2: creating M imputed datasets separately within each bin, where the imputation predictor matrix includes all covariates and the log counts per million (CPM) for the genes within each bin
 
-3: Run RNA-seq analysis on only the genes in this particular bin. The analysis is run on all N imputed data sets separately.
+3: estimating gene expression changes using voom followed by lmFit functions, separately on each M imputed dataset within each gene bin
 
-4: Repeat steps 2 and 3 for all other gene bins.
+4: un-binning the gene sets and stacking the M sets of model results before applying the squeezeVar function to apply a variance shrinking Bayesian procedure to each M set of model results
 
-5: Pool results with Rubins’ rules to produce combined coefficients, combined standard errors, and P-values. Adjust P-values for false discovery rate (FDR).
+5: pooling the results with Rubins’ rules to produce combined coefficients, standard errors, and P-values
+
+6: adjusting P-values for multiplicity to account for false discovery rate (FDR).
 
 ## 1: Bin the genes into smaller groups
-The get_gene_bin_intervals function returns a data frame of intervals that can be used to bin the DGE list. By default, number of bins and genes per bin are set so that each bin has approximately 1 gene per 10 individuals/samples in the data. The default gene bin size can be changed with the n argument.
+The get_gene_bin_intervals function returns a data frame of intervals that can be used to bin the DGE list. By default, number of bins and genes per bin are set so that each bin has approximately 1 gene per 10 individuals/samples in the data. The default gene bin size can be changed with the n argument. When the total number of genes is not divisible by the bin size, the method flexibly creates bins of two different sizes. 
 
 ```{r, message=FALSE, warning=FALSE}
 intervals <- get_gene_bin_intervals(example_DGE, example_data, n = 10)
@@ -82,7 +84,7 @@ annot <- annot[sample(seq_len(nrow(annot))), ]
 example_DGE <- example_DGE[annot, ]
 ```
 
-## 2-4: Make imputed data sets for each bin of genes and conduct differential expression analysis
+## 2: Make imputed data sets for each bin of genes and conduct differential expression analysis
 
 The impute_by_gene_bin function loops through a DGE list using the gene bin intervals from the "get_gene_bin_intervals" function. It returns a list of sets of n imputed datasets, one per gene bin. For instance, if n = 100 and intervals contains 200 gene bin intervals, output will be a list of 200 sets of 100 imputed datasets. Each of the 200 sets are imputed using only the genes in one gene bin. This same procedure can be run more quickly in parallel with the impute_by_gene_bin_parallel function, which uses the 'PSOCK' backend implemented via the doParallel package.
 ```{r, message=FALSE, warning=FALSE, results = 'hide'}
@@ -92,6 +94,8 @@ gene_bin_impute <- impute_by_gene_bin(example_data,
     n = 3
 )
 ```
+
+## 3: Estimate gene expression changes using voom followed by lmFit functions, separately on each M imputed dataset within each gene bin
 
 The limmavoom_imputed_data_list function loops through the imputed data list (output from "impute_by_gene_bin" function) and runs RNA-seq analysis with the limma-voom pipeline. Users specify the formula for the RNA-seq design matrix and the main predictor of interest for which log fold-changes will be estimated. This procedure can also be run in parallel with the limmavoom_imputed_data_list_parallel function. 
 ```{r, message=FALSE, warning=FALSE}
@@ -105,8 +109,9 @@ coef_se <- limmavoom_imputed_data_list(
 )
 ```
 
-## 5: Combine the results from each imputed dataset using Rubin's rules
-The final step is to combine the results from each imputed dataset using Rubin's rules. The argument "model_results" is the output from the "limmavoom_imputed_data_list" function above. The result is a table with one row per gene. The table includes coefficients (e.g., logFC values) standard errors, degrees of freedom, t-statistics, P-Values, and adjusted P-values from the limma-voom pipeline. Both the raw and empirical Bayes moderated statistics are reported (see limma package for details). 
+## 4-6: Apply variance shrinking Bayesian procedure, pooling results with Rubins’ rules, and FDR-adjust P-values
+
+The final step is to combine the results from each imputed dataset using Rubin's rules. The argument "model_results" is the output from the "limmavoom_imputed_data_list" function above. The "combine_rubins" function applies the squeezeVar function before pooling results. The result is a table with one row per gene. The table includes coefficients (e.g., logFC values) standard errors, degrees of freedom, t-statistics, P-Values, and adjusted P-values from the limma-voom pipeline. Both the raw and empirical Bayes moderated statistics are reported (see limma package for details). 
 ```{r, message=FALSE, warning=FALSE}
 final_res <- combine_rubins(
     DGE = example_DGE,
