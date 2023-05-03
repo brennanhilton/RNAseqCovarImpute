@@ -9,7 +9,7 @@
 #' @param data Sample data with one row per sample. Sample row order should match the col order in the DGEList.
 #' @param intervals Output from get_gene_bin_intervals function. A dataframe where each row contains the start (first col) and end (second col) values for each gene bin interval.
 #' @param DGE A DGEList object.
-#' @param n Number of imputed data sets.
+#' @param m Number of imputed data sets.
 #'
 #' @importFrom magrittr %>%
 #' @importFrom dplyr mutate
@@ -24,17 +24,17 @@
 #'
 #' @examples
 #' data(RNAseqCovarImpute_data)
-#' intervals <- get_gene_bin_intervals(example_DGE, example_data, n = 10)
+#' intervals <- get_gene_bin_intervals(example_DGE, example_data, m = 10)
 #' gene_bin_impute <- impute_by_gene_bin(example_data,
 #'     intervals,
 #'     example_DGE,
-#'     n = 2
+#'     m = 2
 #' )
 #' coef_se <- limmavoom_imputed_data_list(
 #'     gene_intervals = intervals,
 #'     DGE = example_DGE,
 #'     imputed_data_list = gene_bin_impute,
-#'     n = 2,
+#'     m = 2,
 #'     voom_formula = "~x + y + z + a + b",
 #'     predictor = "x"
 #' )
@@ -46,7 +46,7 @@
 #' )
 #' @export
 
-impute_by_gene_bin <- function(data, intervals, DGE, n) {
+impute_by_gene_bin <- function(data, intervals, DGE, m) {
     # get the counts per million for all genes in DGE
     cpm_all <- cpm(DGE, log = TRUE, prior.count = 5)
         gene_bin_impute <- foreach(i = seq(nrow(intervals))) %do% {
@@ -56,6 +56,6 @@ impute_by_gene_bin <- function(data, intervals, DGE, n) {
               as_tibble()
             # add the bin of genes to the covaraite data
             data_mice <- data %>% bind_cols(cpm_bin)
-            imputed_data <- mice(data = data_mice, m = n, maxit = 10, seed = 2022, predictorMatrix = quickpred(data_mice))
+            imputed_data <- mice(data = data_mice, m = m, maxit = 10, seed = 2022, predictorMatrix = quickpred(data_mice))
             }
 }

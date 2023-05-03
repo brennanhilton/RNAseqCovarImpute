@@ -9,7 +9,7 @@
 #' @param data Sample data with one row per sample. Sample row order should match the col order in the DGEList.
 #' @param intervals Output from get_gene_bin_intervals function. A dataframe where each row contains the start (first col) and end (second col) values for each gene bin interval.
 #' @param DGE A DGEList object.
-#' @param n Number of imputed data sets.
+#' @param m Number of imputed data sets.
 #' @param cores Number of cores to run in parallel using 'PSOCK' back-end implemented with doParallel.
 #'
 #' @importFrom parallel makeCluster
@@ -28,18 +28,18 @@
 #'
 #' @examples
 #' data(RNAseqCovarImpute_data)
-#' intervals <- get_gene_bin_intervals(example_DGE, example_data, n = 10)
+#' intervals <- get_gene_bin_intervals(example_DGE, example_data, m = 10)
 #' gene_bin_impute <- impute_by_gene_bin_parallel(example_data,
 #'     intervals,
 #'     example_DGE,
-#'     n = 2,
+#'     m = 2,
 #'     cores = 2
 #' )
 #' coef_se <- limmavoom_imputed_data_list_parallel(
 #'     gene_intervals = intervals,
 #'     DGE = example_DGE,
 #'     imputed_data_list = gene_bin_impute,
-#'     n = 2,
+#'     m = 2,
 #'     voom_formula = "~x + y + z + a + b",
 #'     predictor = "x",
 #'     cores = 2
@@ -52,7 +52,7 @@
 #' )
 #' @export
 
-impute_by_gene_bin_parallel <- function(data, intervals, DGE, n, cores) {
+impute_by_gene_bin_parallel <- function(data, intervals, DGE, m, cores) {
     # get the counts per million for all genes in DGE
     cpm_all <- cpm(DGE, log = TRUE, prior.count = 5)
     myCluster <- makeCluster(cores, # number of cores to use
@@ -66,6 +66,6 @@ impute_by_gene_bin_parallel <- function(data, intervals, DGE, n, cores) {
           as_tibble()
         # add the bin of genes to the covaraite data
         data_mice <- data %>% bind_cols(cpm_bin)
-        imputed_data <- mice(data_mice, m = n, maxit = 10, seed = 2022, predictorMatrix = quickpred(data_mice))
+        imputed_data <- mice(data_mice, m = m, maxit = 10, seed = 2022, predictorMatrix = quickpred(data_mice))
     }
 }
