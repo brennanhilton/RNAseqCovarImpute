@@ -1,4 +1,4 @@
-#' limmavoom_imputed_data_list_parallel
+#' limmavoom_imputed_data_list_parallel_new
 #'
 #' Loops through the imputed data list (output from "impute_by_gene_bin" function)
 #' and runs limma-voom RNA seq analysis.
@@ -51,7 +51,7 @@
 #' )
 #' @export
 
-limmavoom_imputed_data_list_parallel <- function(gene_intervals, DGE, imputed_data_list, m, cores, voom_formula, predictor) {
+limmavoom_imputed_data_list_parallel_new <- function(gene_intervals, DGE, imputed_data_list, m, cores, voom_formula, predictor) {
   sx_sy <- lowess_all_gene_bins(gene_intervals, DGE, imputed_data_list, m, voom_formula, predictor)  
   myCluster <- makeCluster(
         cores, # number of cores to use

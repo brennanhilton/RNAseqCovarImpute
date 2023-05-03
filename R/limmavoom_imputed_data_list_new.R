@@ -1,4 +1,4 @@
-#' limmavoom_imputed_data_list
+#' limmavoom_imputed_data_list_new
 #'
 #' Loops through the imputed data list (output from "impute_by_gene_bin" function)
 #' and runs limma-voom RNA seq analysis.
