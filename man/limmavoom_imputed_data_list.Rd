@@ -8,7 +8,7 @@ limmavoom_imputed_data_list(
   gene_intervals,
   DGE,
   imputed_data_list,
-  n,
+  m,
   voom_formula,
   predictor
 )
@@ -20,7 +20,7 @@ limmavoom_imputed_data_list(
 
 \item{imputed_data_list}{Output from impute_by_gene_bin or impute_by_gene_bin_parallel.}
 
-\item{n}{Number of imputed data sets.}
+\item{m}{Number of imputed data sets.}
 
 \item{voom_formula}{Formula for design matrix.}
 
@@ -35,17 +35,17 @@ and runs limma-voom RNA seq analysis.
 }
 \examples{
 data(RNAseqCovarImpute_data)
-intervals <- get_gene_bin_intervals(example_DGE, example_data, n = 10)
+intervals <- get_gene_bin_intervals(example_DGE, example_data, m = 10)
 gene_bin_impute <- impute_by_gene_bin(example_data,
     intervals,
     example_DGE,
-    n = 2
+    m = 2
 )
 coef_se <- limmavoom_imputed_data_list(
     gene_intervals = intervals,
     DGE = example_DGE,
     imputed_data_list = gene_bin_impute,
-    n = 2,
+    m = 2,
     voom_formula = "~x + y + z + a + b",
     predictor = "x"
 )

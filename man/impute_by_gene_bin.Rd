@@ -4,7 +4,7 @@
 \alias{impute_by_gene_bin}
 \title{impute_by_gene_bin}
 \usage{
-impute_by_gene_bin(data, intervals, DGE, n)
+impute_by_gene_bin(data, intervals, DGE, m)
 }
 \arguments{
 \item{data}{Sample data with one row per sample. Sample row order should match the col order in the DGEList.}
@@ -13,7 +13,7 @@ impute_by_gene_bin(data, intervals, DGE, n)
 
 \item{DGE}{A DGEList object.}
 
-\item{n}{Number of imputed data sets.}
+\item{m}{Number of imputed data sets.}
 }
 \value{
 A list of sets of n imputed datasets, one per gene bin.
@@ -27,17 +27,17 @@ using only the genes in one gene bin.
 }
 \examples{
 data(RNAseqCovarImpute_data)
-intervals <- get_gene_bin_intervals(example_DGE, example_data, n = 10)
+intervals <- get_gene_bin_intervals(example_DGE, example_data, m = 10)
 gene_bin_impute <- impute_by_gene_bin(example_data,
     intervals,
     example_DGE,
-    n = 2
+    m = 2
 )
 coef_se <- limmavoom_imputed_data_list(
     gene_intervals = intervals,
     DGE = example_DGE,
     imputed_data_list = gene_bin_impute,
-    n = 2,
+    m = 2,
     voom_formula = "~x + y + z + a + b",
     predictor = "x"
 )

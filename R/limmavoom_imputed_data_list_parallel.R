@@ -6,7 +6,7 @@
 #' @param gene_intervals Output from get_gene_bin_intervals function. A dataframe where each row contains the start (first col) and end (second col) values for each gene bin interval.
 #' @param DGE A DGEList object.
 #' @param imputed_data_list Output from impute_by_gene_bin or impute_by_gene_bin_parallel.
-#' @param n Number of imputed data sets.
+#' @param m Number of imputed data sets.
 #' @param cores Number of cores to run in parallel using 'PSOCK' back-end implemented with doParallel.
 #' @param voom_formula Formula for design matrix.
 #' @param predictor Independent variable of interest. Must be a variable in voom_formula.
@@ -26,24 +26,24 @@
 #' @importFrom dplyr left_join
 #' @importFrom stats model.matrix
 #' @importFrom rlang .data
+#' @importFrom limma normalizeBetweenArrays
+#' @importFrom limma lmFit
 #'
 #' @examples
 #' data(RNAseqCovarImpute_data)
-#' intervals <- get_gene_bin_intervals(example_DGE, example_data, n = 10)
-#' gene_bin_impute <- impute_by_gene_bin_parallel(example_data,
+#' intervals <- get_gene_bin_intervals(example_DGE, example_data, m = 10)
+#' gene_bin_impute <- impute_by_gene_bin(example_data,
 #'     intervals,
 #'     example_DGE,
-#'     n = 2,
-#'     cores = 2
+#'     m = 2
 #' )
 #' coef_se <- limmavoom_imputed_data_list_parallel(
 #'     gene_intervals = intervals,
 #'     DGE = example_DGE,
 #'     imputed_data_list = gene_bin_impute,
-#'     n = 2,
+#'     m = 2,
 #'     voom_formula = "~x + y + z + a + b",
-#'     predictor = "x",
-#'     cores = 2
+#'     predictor = "x"
 #' )
 #'
 #' final_res <- combine_rubins(
@@ -53,8 +53,10 @@
 #' )
 #' @export
 
-limmavoom_imputed_data_list_parallel <- function(gene_intervals, DGE, imputed_data_list, n, cores, voom_formula, predictor) {
-    myCluster <- makeCluster(
+limmavoom_imputed_data_list_parallel <- function(gene_intervals, DGE, imputed_data_list, m, cores, voom_formula, predictor) {
+  # get mean-variance curve from all genes across all M imputations
+  sx_sy <- lowess_all_gene_bins(gene_intervals, DGE, imputed_data_list, m, voom_formula, predictor)  
+  myCluster <- makeCluster(
         cores, # number of cores to use
         type <- "PSOCK"
     ) # type of cluster
@@ -67,7 +69,7 @@ limmavoom_imputed_data_list_parallel <- function(gene_intervals, DGE, imputed_da
         # get dge list for this gene interval
         alldg_bin <- DGE[as.numeric(gene_intervals[gene_bin, 1]):as.numeric(gene_intervals[gene_bin, 2]), ]
 
-        all_coef_se_within_bin <- foreach(i = seq(n), .combine = "left_join") %do% {
+        all_coef_se_within_bin <- foreach(i = seq(m), .combine = "left_join") %do% {
             # we have imputed data for a particular gene bin interval.
             # now we get the ith imputed data set within
             data_i <- complete(imputed_data, i)
@@ -75,7 +77,7 @@ limmavoom_imputed_data_list_parallel <- function(gene_intervals, DGE, imputed_da
             # run limmavoom
             design1 <- model.matrix(as.formula(voom_formula), data_i)
           
-            voom1 <- voom2(alldg_bin, design1, lib.size.all = colSums(as.matrix(DGE)))
+            voom1 <- voom_master_lowess(alldg_bin, design1, lib.size.all = DGE$samples$lib.size*DGE$samples$norm.factors, sx = sx_sy$sx, sy = sx_sy$sy)
             fit1 <- lmFit(voom1)
           
             # get coefficients unscaled SE, df residual, and sigma from fit1
