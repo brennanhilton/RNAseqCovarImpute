@@ -4,7 +4,7 @@
 \alias{impute_by_gene_bin}
 \title{impute_by_gene_bin}
 \usage{
-impute_by_gene_bin(data, intervals, DGE, m)
+impute_by_gene_bin(data, intervals, DGE, m, maxit = 10)
 }
 \arguments{
 \item{data}{Sample data with one row per sample. Sample row order should match the col order in the DGEList.}
@@ -14,6 +14,8 @@ impute_by_gene_bin(data, intervals, DGE, m)
 \item{DGE}{A DGEList object.}
 
 \item{m}{Number of imputed data sets.}
+
+\item{maxit}{Used by mice function.}
 }
 \value{
 A list of sets of n imputed datasets, one per gene bin.

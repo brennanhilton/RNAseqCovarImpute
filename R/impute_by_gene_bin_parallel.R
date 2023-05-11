@@ -10,6 +10,7 @@
 #' @param intervals Output from get_gene_bin_intervals function. A dataframe where each row contains the start (first col) and end (second col) values for each gene bin interval.
 #' @param DGE A DGEList object.
 #' @param m Number of imputed data sets.
+#' @param maxit Used by mice function.
 #' @param cores Number of cores to run in parallel using 'PSOCK' back-end implemented with doParallel.
 #'
 #' @importFrom parallel makeCluster
@@ -52,7 +53,7 @@
 #' )
 #' @export
 
-impute_by_gene_bin_parallel <- function(data, intervals, DGE, m, cores) {
+impute_by_gene_bin_parallel <- function(data, intervals, DGE, m, cores, maxit = 10) {
     # get the counts per million for all genes in DGE
     cpm_all <- cpm(DGE, log = TRUE, prior.count = 5)
     myCluster <- makeCluster(cores, # number of cores to use
@@ -66,6 +67,6 @@ impute_by_gene_bin_parallel <- function(data, intervals, DGE, m, cores) {
           as_tibble()
         # add the bin of genes to the covaraite data
         data_mice <- data %>% bind_cols(cpm_bin)
-        imputed_data <- mice(data_mice, m = m, maxit = 10, seed = 2022, predictorMatrix = quickpred(data_mice))
+        imputed_data <- mice(data_mice, m = m, maxit = maxit, predictorMatrix = quickpred(data_mice))
     }
 }

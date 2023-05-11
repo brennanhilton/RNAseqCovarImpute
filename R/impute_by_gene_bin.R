@@ -10,6 +10,7 @@
 #' @param intervals Output from get_gene_bin_intervals function. A dataframe where each row contains the start (first col) and end (second col) values for each gene bin interval.
 #' @param DGE A DGEList object.
 #' @param m Number of imputed data sets.
+#' @param maxit Used by mice function.
 #'
 #' @importFrom magrittr %>%
 #' @importFrom dplyr mutate
@@ -46,7 +47,7 @@
 #' )
 #' @export
 
-impute_by_gene_bin <- function(data, intervals, DGE, m) {
+impute_by_gene_bin <- function(data, intervals, DGE, m, maxit = 10) {
     # get the counts per million for all genes in DGE
     cpm_all <- cpm(DGE, log = TRUE, prior.count = 5)
         gene_bin_impute <- foreach(i = seq(nrow(intervals))) %do% {
@@ -56,6 +57,6 @@ impute_by_gene_bin <- function(data, intervals, DGE, m) {
               as_tibble()
             # add the bin of genes to the covaraite data
             data_mice <- data %>% bind_cols(cpm_bin)
-            imputed_data <- mice(data = data_mice, m = m, maxit = 10, seed = 2022, predictorMatrix = quickpred(data_mice))
+            imputed_data <- mice(data = data_mice, m = m, maxit = maxit, predictorMatrix = quickpred(data_mice))
             }
 }

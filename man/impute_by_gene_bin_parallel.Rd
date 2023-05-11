@@ -4,7 +4,7 @@
 \alias{impute_by_gene_bin_parallel}
 \title{impute_by_gene_bin_parallel}
 \usage{
-impute_by_gene_bin_parallel(data, intervals, DGE, m, cores)
+impute_by_gene_bin_parallel(data, intervals, DGE, m, cores, maxit = 10)
 }
 \arguments{
 \item{data}{Sample data with one row per sample. Sample row order should match the col order in the DGEList.}
@@ -16,6 +16,8 @@ impute_by_gene_bin_parallel(data, intervals, DGE, m, cores)
 \item{m}{Number of imputed data sets.}
 
 \item{cores}{Number of cores to run in parallel using 'PSOCK' back-end implemented with doParallel.}
+
+\item{maxit}{Used by mice function.}
 }
 \value{
 A list of sets of n imputed datasets, one per gene bin.
