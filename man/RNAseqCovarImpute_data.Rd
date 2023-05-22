@@ -10,6 +10,9 @@ Two objects: A data frame with 500 rows and 5 variables and A DGElist with 500 g
 \usage{
 data(RNAseqCovarImpute_data)
 }
+\value{
+Tibble with 500 rows of data for variables x, y, and z
+}
 \description{
 I created the \code{RNAseqCovarImpute_data} dataset to show how to use the package functions.
 The exact code used to generate these data are found in the Example_Data_for_RNAseqCovarImpute

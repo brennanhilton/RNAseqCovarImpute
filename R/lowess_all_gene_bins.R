@@ -3,6 +3,7 @@
 #' Loops through all bins and all M imputations, prepares DGE and design to run
 #' voom_sx_sy, which fits gene-wise linear models and extracts log count size (sx)
 #' and sqrt resudual standard deviations (sy) to make the lowess curve
+#' @return All sx and sy values for lowess function across all M imputation.
 lowess_all_gene_bins <- function(gene_intervals, DGE, imputed_data_list, m, voom_formula, predictor) {
   lowess_all_gene_bins <- foreach(i = seq(m), .combine = "rbind") %do% {
     

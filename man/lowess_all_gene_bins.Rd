@@ -13,6 +13,9 @@ lowess_all_gene_bins(
   predictor
 )
 }
+\value{
+All sx and sy values for lowess function across all M imputation.
+}
 \description{
 Loops through all bins and all M imputations, prepares DGE and design to run
 voom_sx_sy, which fits gene-wise linear models and extracts log count size (sx)

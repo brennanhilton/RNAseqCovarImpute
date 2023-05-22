@@ -18,6 +18,9 @@ voom_sx_sy(
   lib.size.all
 )
 }
+\value{
+Tibble with one col for sx and one for sy for lowess function.
+}
 \description{
 Modified voom function used by limma_voom-imputed_data_list function.
 Allows input of bins of outcome genes while still accounting for the total library size

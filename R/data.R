@@ -13,6 +13,7 @@
 #' \item{example_DGE}{random count data for 500 made up genes in a DGElist}
 #' ...
 #' }
+#' @return Tibble with 500 rows of data for variables x, y, and z
 #' @docType data
 #' @keywords datasets
 #' @name RNAseqCovarImpute_data

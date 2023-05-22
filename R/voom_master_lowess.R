@@ -5,6 +5,7 @@
 #'of all outcome genes, as the total library size is needed to calculate log-cpm values.
 #'Also allows use of external sx and sy to create lowess curve. Here, sx and sy should
 #'come from all gene bins across all M imputations.
+#'@return Same as normal voom.
 voom_master_lowess <- function(counts,design=NULL,lib.size=NULL,normalize.method="none",block=NULL,correlation=NULL,weights=NULL,span=0.5,plot=FALSE,save.plot=FALSE, lib.size.all, sx, sy)
   #	Linear modelling of count data with mean-variance modelling at the observation level.
   #	Creates an EList object for entry to lmFit() etc in the limma pipeline.

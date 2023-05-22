@@ -34,7 +34,7 @@ Combines results from each imputed dataset using Rubin's rules.
 }
 \examples{
 data(RNAseqCovarImpute_data)
-intervals <- get_gene_bin_intervals(example_DGE, example_data, m = 10)
+intervals <- get_gene_bin_intervals(example_DGE, example_data, n = 10)
 gene_bin_impute <- impute_by_gene_bin(example_data,
     intervals,
     example_DGE,

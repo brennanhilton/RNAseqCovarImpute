@@ -20,6 +20,9 @@ voom_master_lowess(
   sy
 )
 }
+\value{
+Same as normal voom.
+}
 \description{
 Modified voom function used by limma_voom-imputed_data_list function.
 Allows input of bins of outcome genes while still accounting for the total library size

@@ -19,8 +19,6 @@ Suggests: BiocStyle, knitr, rmarkdown, tidyr, stringr
 Imports:
     Biobase,
     stats,
-    methods,
-    graphics,
     limma,
     dplyr,
     magrittr,

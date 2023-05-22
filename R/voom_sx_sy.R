@@ -4,6 +4,7 @@
 #'Allows input of bins of outcome genes while still accounting for the total library size
 #'of all outcome genes, as the total library size is needed to calculate log-cpm values.
 #'Returns just the sx and sy values needed for lowess curve.
+#'@return Tibble with one col for sx and one for sy for lowess function.
 voom_sx_sy <- function(counts,design=NULL,lib.size=NULL,normalize.method="none",block=NULL,correlation=NULL,weights=NULL,span=0.5,plot=FALSE,save.plot=FALSE, lib.size.all)
   #	Linear modelling of count data with mean-variance modelling at the observation level.
   #	Creates an EList object for entry to lmFit() etc in the limma pipeline.
