@@ -50,7 +50,8 @@ coef_se <- limmavoom_imputed_data_list_parallel(
     imputed_data_list = gene_bin_impute,
     m = 2,
     voom_formula = "~x + y + z + a + b",
-    predictor = "x"
+    predictor = "x",
+    cores = 2
 )
 
 final_res <- combine_rubins(
