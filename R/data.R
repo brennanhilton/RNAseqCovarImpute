@@ -18,5 +18,7 @@
 #' @keywords datasets
 #' @name RNAseqCovarImpute_data
 #' @usage data(RNAseqCovarImpute_data)
+#' @examples
+#' data(RNAseqCovarImpute_data)
 #' @format Two objects: A data frame with 500 rows and 5 variables and A DGElist with 500 genes and 500 samples
 NULL

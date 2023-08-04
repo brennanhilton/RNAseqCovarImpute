@@ -29,4 +29,7 @@ for 500 made up genes, ENS1-ENS500
 ...
 }
 }
+\examples{
+data(RNAseqCovarImpute_data)
+}
 \keyword{datasets}

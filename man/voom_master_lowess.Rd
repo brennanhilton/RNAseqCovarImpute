@@ -30,3 +30,28 @@ of all outcome genes, as the total library size is needed to calculate log-cpm v
 Also allows use of external sx and sy to create lowess curve. Here, sx and sy should
 come from all gene bins across all M imputations.
 }
+\examples{
+data(RNAseqCovarImpute_data)
+intervals <- get_gene_bin_intervals(example_DGE, example_data, n = 10)
+gene_bin_impute <- impute_by_gene_bin(example_data,
+    intervals,
+    example_DGE,
+    m = 2
+)
+coef_se <- limmavoom_imputed_data_list(
+    gene_intervals = intervals,
+    DGE = example_DGE,
+    imputed_data_list = gene_bin_impute,
+    m = 2,
+    voom_formula = "~x + y + z + a + b",
+    predictor = "x"
+)
+
+final_res <- combine_rubins(
+    DGE = example_DGE,
+    model_results = coef_se,
+    voom_formula = "~x + y + z + a + b"
+)
+
+}
+\keyword{internal}

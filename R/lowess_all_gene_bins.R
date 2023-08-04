@@ -4,6 +4,26 @@
 #' voom_sx_sy, which fits gene-wise linear models and extracts log count size (sx)
 #' and sqrt resudual standard deviations (sy) to make the lowess curve
 #' @return All sx and sy values for lowess function across all M imputation.
+#' 
+#' @examples
+#' data(RNAseqCovarImpute_data)
+#' intervals <- get_gene_bin_intervals(example_DGE, example_data, n = 10)
+#' gene_bin_impute <- impute_by_gene_bin(example_data,
+#'     intervals,
+#'     example_DGE,
+#'     m = 2
+#' )
+#' sx_sy <- lowess_all_gene_bins(
+#'     gene_intervals = intervals,
+#'     DGE = example_DGE,
+#'     imputed_data_list = gene_bin_impute,
+#'     m = 2,
+#'     voom_formula = "~x + y + z + a + b",
+#'     predictor = "x"
+#' )
+#' 
+#' @export
+#' @keywords internal
 lowess_all_gene_bins <- function(gene_intervals, DGE, imputed_data_list, m, voom_formula, predictor) {
   lowess_all_gene_bins <- foreach(i = seq(m), .combine = "rbind") %do% {
     
