@@ -14,6 +14,7 @@
 #' @param cores Number of cores to run in parallel using 'PSOCK' back-end implemented with doParallel.
 #'
 #' @importFrom parallel makeCluster
+#' @importFrom parallel stopCluster
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach %dopar%
 #' @importFrom magrittr %>%
@@ -69,4 +70,6 @@ impute_by_gene_bin_parallel <- function(data, intervals, DGE, m, cores, maxit = 
         data_mice <- data %>% bind_cols(cpm_bin)
         imputed_data <- mice(data_mice, m = m, maxit = maxit, predictorMatrix = quickpred(data_mice))
     }
+    stopCluster(myCluster)
+    gene_bin_impute
 }

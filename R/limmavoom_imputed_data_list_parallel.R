@@ -12,6 +12,7 @@
 #' @param predictor Independent variable of interest. Must be a variable in voom_formula.
 #'
 #' @importFrom parallel makeCluster
+#' @importFrom parallel stopCluster
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach %dopar%
 #' @importFrom magrittr %>%
@@ -106,4 +107,6 @@ limmavoom_imputed_data_list_parallel <- function(gene_intervals, DGE, imputed_da
             output1
         }
     }
+    stopCluster(myCluster)
+    all_coefs_se
 }
