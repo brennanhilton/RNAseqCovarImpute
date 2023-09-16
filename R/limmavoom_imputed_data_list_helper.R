@@ -1,34 +1,23 @@
-#' limmavoom_imputed_data_list_parallel
+#' limmavoom_imputed_data_list_helper
 #'
 #' Loops through the imputed data list (output from "impute_by_gene_bin" function)
 #' and runs limma-voom RNA seq analysis.
 #' @return A dataframe with coefficient, standard error, sigma, and residual degrees of freedom values from limma-voom gene expression analysis. One row per gene and one set of values per imputed dataset.
 #' @param gene_intervals Output from get_gene_bin_intervals function. A dataframe where each row contains the start (first col) and end (second col) values for each gene bin interval.
 #' @param DGE A DGEList object.
-#' @param imputed_data_list Output from impute_by_gene_bin or impute_by_gene_bin_parallel.
+#' @param imputed_data_list Output from impute_by_gene_bin.
 #' @param m Number of imputed data sets.
-#' @param cores Number of cores to run in parallel using 'PSOCK' back-end implemented with doParallel.
 #' @param voom_formula Formula for design matrix.
 #' @param predictor Independent variable of interest. Must be a variable in voom_formula.
 #'
-#' @importFrom parallel makeCluster
-#' @importFrom parallel stopCluster
-#' @importFrom doParallel registerDoParallel
-#' @importFrom foreach %dopar%
 #' @importFrom magrittr %>%
-#' @importFrom dplyr mutate
-#' @importFrom foreach %do%
-#' @importFrom foreach foreach
+#' @importFrom dplyr mutate bind_cols as_tibble left_join
+#' @importFrom foreach %do% foreach
 #' @importFrom edgeR cpm
-#' @importFrom mice mice
-#' @importFrom mice quickpred
-#' @importFrom dplyr bind_cols
-#' @importFrom dplyr as_tibble
-#' @importFrom dplyr left_join
+#' @importFrom mice mice quickpred
 #' @importFrom stats model.matrix
 #' @importFrom rlang .data
-#' @importFrom limma normalizeBetweenArrays
-#' @importFrom limma lmFit
+#' @importFrom limma normalizeBetweenArrays lmFit
 #'
 #' @examples
 #' data(RNAseqCovarImpute_data)
@@ -36,16 +25,17 @@
 #' gene_bin_impute <- impute_by_gene_bin(example_data,
 #'     intervals,
 #'     example_DGE,
-#'     m = 2
+#'     m = 2,
+#'     param = SerialParam()
 #' )
-#' coef_se <- limmavoom_imputed_data_list_parallel(
+#' coef_se <- limmavoom_imputed_data_list(
 #'     gene_intervals = intervals,
 #'     DGE = example_DGE,
 #'     imputed_data_list = gene_bin_impute,
 #'     m = 2,
 #'     voom_formula = "~x + y + z + a + b",
 #'     predictor = "x",
-#'     cores = 2
+#'     param = SerialParam()
 #' )
 #'
 #' final_res <- combine_rubins(
@@ -54,18 +44,10 @@
 #'     voom_formula = "~x + y + z + a + b"
 #' )
 #' @export
-
-limmavoom_imputed_data_list_parallel <- function(gene_intervals, DGE, imputed_data_list, m, cores, voom_formula, predictor) {
+#' @keywords internal
+limmavoom_imputed_data_list_helper <- function(gene_bin, gene_intervals, DGE, imputed_data_list, m, voom_formula, predictor, sx_sy) {
   # get mean-variance curve from all genes across all M imputations
-  sx_sy <- lowess_all_gene_bins(gene_intervals, DGE, imputed_data_list, m, voom_formula, predictor)  
-  myCluster <- makeCluster(
-        cores, # number of cores to use
-        type <- "PSOCK"
-    ) # type of cluster
-
-    registerDoParallel(myCluster)
-
-    all_coefs_se <- foreach(gene_bin = seq(length(imputed_data_list)), .combine = "rbind") %dopar% {
+  
         # get imputed data
         imputed_data <- imputed_data_list[[gene_bin]]
         # get dge list for this gene interval
@@ -99,14 +81,12 @@ limmavoom_imputed_data_list_parallel <- function(gene_intervals, DGE, imputed_da
           
             output1 <- coef %>%
                 cbind(SE_unscaled) %>%
-                mutate(ENSEMBL = rownames(fit1),
+                mutate(probe = rownames(fit1),
                        sigma = sigma,
                        df_residual = degrees_freedom_residual)
             # rename fit values to include info on which imputed data they come from
-            colnames(output1)[colnames(output1)!= "ENSEMBL"] <- paste0(colnames(output1)[colnames(output1)!= "ENSEMBL"],".",i)
+            colnames(output1)[colnames(output1)!= "probe"] <- paste0(colnames(output1)[colnames(output1)!= "probe"],".",i)
             output1
         }
-    }
-    stopCluster(myCluster)
-    all_coefs_se
+        return(all_coef_se_within_bin)
 }

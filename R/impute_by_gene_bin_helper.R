@@ -1,4 +1,4 @@
-#' impute_by_gene_bin
+#' impute_by_gene_bin_helper
 #'
 #' Loops through DGE list using the gene bin intervals from the
 #' "get_gene_bin_intervals" function and makes imputed datasets. For instance,
@@ -45,34 +45,19 @@
 #'     voom_formula = "~x + y + z + a + b"
 #' )
 #' @export
-
-
-# Define the function to perform parallel imputation using bplapply
-impute_by_gene_bin <- function(data, intervals, DGE, m, maxit = 10, param = bpparam()) {
-  # Validity tests
-  if (!class(DGE) %in% "DGEList") {
-    stop("Input 'DGE' is not a valid DGEList object.")
-  }
-  if (!(class(data) %in% c("tbl_df", "tbl", "data.frame"))) {
-    stop("Input 'data' is not a valid data.frame, tbl, or tbl_df object.")
-  }
-  if (!(class(m) %in% c("numeric"))) {
-    stop("Input 'm' must be numeric.")
-  }
-  if (!(class(maxit) %in% c("numeric"))) {
-    stop("Input 'maxit' must be numeric.")
-  }
-  # get the counts per million for all genes in DGE
-  cpm_all <- cpm(example_DGE, log = TRUE, prior.count = 5)
+#' @keywords internal
+# Define a function for imputation that will be called by bplapply
+impute_gene_bin_helper <- function(i, intervals, cpm_all, data, m, maxit) {
+  # Extract cpm for the current bin of genes based on the interval
+  cpm_bin <- cpm_all[as.numeric(intervals[i, 1]):as.numeric(intervals[i, 2]), ] %>%
+    t() %>%
+    as_tibble()
   
-  gene_bin_impute <- bplapply(seq(nrow(intervals)), 
-                              impute_gene_bin_helper,
-                              intervals = intervals,
-                              cpm_all = cpm_all,
-                              data = data,
-                              m = m,
-                              maxit = maxit,
-                              BPPARAM = param)
+  # Add the bin of genes to the covariate data
+  data_mice <- data %>% bind_cols(cpm_bin)
   
-  return(gene_bin_impute)
+  # Impute the data using mice
+  imputed_data <- mice(data_mice, m = m, maxit = maxit, predictorMatrix = quickpred(data_mice))
+  
+  return(imputed_data)
 }

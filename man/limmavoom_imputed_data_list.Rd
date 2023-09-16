@@ -10,7 +10,8 @@ limmavoom_imputed_data_list(
   imputed_data_list,
   m,
   voom_formula,
-  predictor
+  predictor,
+  param = bpparam()
 )
 }
 \arguments{
@@ -18,7 +19,7 @@ limmavoom_imputed_data_list(
 
 \item{DGE}{A DGEList object.}
 
-\item{imputed_data_list}{Output from impute_by_gene_bin or impute_by_gene_bin_parallel.}
+\item{imputed_data_list}{Output from impute_by_gene_bin.}
 
 \item{m}{Number of imputed data sets.}
 
@@ -39,7 +40,8 @@ intervals <- get_gene_bin_intervals(example_DGE, example_data, n = 10)
 gene_bin_impute <- impute_by_gene_bin(example_data,
     intervals,
     example_DGE,
-    m = 2
+    m = 2,
+    param = SerialParam()
 )
 coef_se <- limmavoom_imputed_data_list(
     gene_intervals = intervals,
@@ -47,7 +49,8 @@ coef_se <- limmavoom_imputed_data_list(
     imputed_data_list = gene_bin_impute,
     m = 2,
     voom_formula = "~x + y + z + a + b",
-    predictor = "x"
+    predictor = "x",
+    param = SerialParam()
 )
 
 final_res <- combine_rubins(

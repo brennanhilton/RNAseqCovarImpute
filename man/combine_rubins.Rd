@@ -16,18 +16,29 @@ combine_rubins(
 \arguments{
 \item{DGE}{A DGEList object.}
 
-\item{model_results}{Output from limmavoom_imputed_datalist or limmavoom_imputed_data_list_parallel.}
+\item{model_results}{Output from limmavoom_imputed_datalist.}
 
 \item{voom_formula}{Formula for design matrix. Should be same formula used to create model_results.}
 
-\item{covariate}{See limma squeezeVar function.}
+\item{covariate}{Arguments passed to limma::squeezeVar.}
 
-\item{robust}{See limma squeezeVar function.}
+\item{robust}{Arguments passed to limma::squeezeVar.}
 
-\item{winsor.tail.p}{See limma squeezeVar function.}
+\item{winsor.tail.p}{Arguments passed to limma::squeezeVar.}
 }
 \value{
 Dataframe with one row per gene containing coefficients standard errors, degrees of freedom, t-statistics, P-Values, and adjusted P-values from the limma-voom pipeline.
+\item{coef_combined}{combined logFCs across the multiple imputed datasets using Rubin's rules}
+\item{SE_P}{pooled standard error across the multiple imputed datasets using Rubin's rules}
+\item{SE_P_bayes}{pooled standard error across the multiple imputed datasets using Rubin's rules squeezed to global mean variance trend curve with limma-voom Bayesian procedure}
+\item{df}{limma-voom residual degrees of freedom adjusted for Rubin's rules}
+\item{df_bayes}{limma-voom residual degrees of freedom adjusted for Rubin's rules and Bayesian procedure}
+\item{rubins_t}{t-statistic = coef_combined divided by SE_p}
+\item{rubins_t_bayes}{t-statistic = coef_combined divided by SE_p_bayes}
+\item{combined_p}{p-value from two-sided t-distribution alpha = 0.05 using rubins_t}
+\item{combined_p_bayes}{p-value from two-sided t-distribution alpha = 0.05 using rubins_t_bayes}
+\item{combined_p_adj}{false discovery rate (FDR) adjusted combined_p}
+\item{combined_p_adj_bayes}{false discovery rate (FDR) adjusted combined_p_bayes}
 }
 \description{
 Combines results from each imputed dataset using Rubin's rules.
@@ -38,7 +49,8 @@ intervals <- get_gene_bin_intervals(example_DGE, example_data, n = 10)
 gene_bin_impute <- impute_by_gene_bin(example_data,
     intervals,
     example_DGE,
-    m = 2
+    m = 2,
+    param = SerialParam()
 )
 coef_se <- limmavoom_imputed_data_list(
     gene_intervals = intervals,
@@ -46,7 +58,8 @@ coef_se <- limmavoom_imputed_data_list(
     imputed_data_list = gene_bin_impute,
     m = 2,
     voom_formula = "~x + y + z + a + b",
-    predictor = "x"
+    predictor = "x",
+    param = SerialParam()
 )
 
 final_res <- combine_rubins(

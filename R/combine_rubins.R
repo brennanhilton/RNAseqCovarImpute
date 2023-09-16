@@ -2,12 +2,23 @@
 #'
 #' Combines results from each imputed dataset using Rubin's rules.
 #' @return Dataframe with one row per gene containing coefficients standard errors, degrees of freedom, t-statistics, P-Values, and adjusted P-values from the limma-voom pipeline.
+#' \item{coef_combined}{combined logFCs across the multiple imputed datasets using Rubin's rules}
+#' \item{SE_P}{pooled standard error across the multiple imputed datasets using Rubin's rules}
+#' \item{SE_P_bayes}{pooled standard error across the multiple imputed datasets using Rubin's rules squeezed to global mean variance trend curve with limma-voom Bayesian procedure}
+#' \item{df}{limma-voom residual degrees of freedom adjusted for Rubin's rules}
+#' \item{df_bayes}{limma-voom residual degrees of freedom adjusted for Rubin's rules and Bayesian procedure}
+#' \item{rubins_t}{t-statistic = coef_combined divided by SE_p}
+#' \item{rubins_t_bayes}{t-statistic = coef_combined divided by SE_p_bayes}
+#' \item{combined_p}{p-value from two-sided t-distribution alpha = 0.05 using rubins_t}
+#' \item{combined_p_bayes}{p-value from two-sided t-distribution alpha = 0.05 using rubins_t_bayes}
+#' \item{combined_p_adj}{false discovery rate (FDR) adjusted combined_p}
+#' \item{combined_p_adj_bayes}{false discovery rate (FDR) adjusted combined_p_bayes}
 #' @param DGE A DGEList object.
-#' @param model_results Output from limmavoom_imputed_datalist or limmavoom_imputed_data_list_parallel.
+#' @param model_results Output from limmavoom_imputed_datalist.
 #' @param voom_formula Formula for design matrix. Should be same formula used to create model_results.
-#' @param covariate See limma squeezeVar function.
-#' @param robust See limma squeezeVar function.
-#' @param winsor.tail.p See limma squeezeVar function.
+#' @param covariate Arguments passed to limma::squeezeVar.
+#' @param robust Arguments passed to limma::squeezeVar.
+#' @param winsor.tail.p Arguments passed to limma::squeezeVar.
 #'
 #' @importFrom magrittr %>%
 #' @importFrom dplyr select
@@ -27,7 +38,8 @@
 #' gene_bin_impute <- impute_by_gene_bin(example_data,
 #'     intervals,
 #'     example_DGE,
-#'     m = 2
+#'     m = 2,
+#'     param = SerialParam()
 #' )
 #' coef_se <- limmavoom_imputed_data_list(
 #'     gene_intervals = intervals,
@@ -35,7 +47,8 @@
 #'     imputed_data_list = gene_bin_impute,
 #'     m = 2,
 #'     voom_formula = "~x + y + z + a + b",
-#'     predictor = "x"
+#'     predictor = "x",
+#'     param = SerialParam()
 #' )
 #'
 #' final_res <- combine_rubins(
@@ -47,6 +60,16 @@
 
 
 combine_rubins <- function(DGE, model_results, voom_formula, covariate = NULL, robust = FALSE, winsor.tail.p = c(0.05, 0.1)) {
+    # Validity tests
+    if (!class(DGE) %in% "DGEList") {
+      stop("Input 'DGE' is not a valid DGEList object.")
+    }
+    if (!class(as.formula(voom_formula))%in% c("formula")) {
+      stop()
+    }
+    if (!(class(model_results) %in% c("tbl_df", "tbl", "data.frame"))) {
+      stop("Input 'predictor' must be a character")
+    }
     # All residual dfs are the same (n-k-1)
     df_residual <- model_results$df_residual.1
 
@@ -140,7 +163,7 @@ combine_rubins <- function(DGE, model_results, voom_formula, covariate = NULL, r
     df_bayes <- (DFold * DFobs) / (DFold + DFobs)
 
     # Get the final results!
-    rubins_t <- tibble(ENSEMBL = model_results$ENSEMBL, coef_combined = coefs_combined$coef_pooled, SE_p = SE_p, SE_p_bayes = SE_p_bayes, df = df, df_bayes = df_bayes) %>%
+    rubins_t <- tibble(probe = model_results$probe, coef_combined = coefs_combined$coef_pooled, SE_p = SE_p, SE_p_bayes = SE_p_bayes, df = df, df_bayes = df_bayes) %>%
         mutate(
             rubins_t = coef_combined / SE_p,
             rubins_t_bayes = coef_combined / SE_p_bayes

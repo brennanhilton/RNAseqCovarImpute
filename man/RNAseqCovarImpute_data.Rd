@@ -3,18 +3,12 @@
 \docType{data}
 \name{RNAseqCovarImpute_data}
 \alias{RNAseqCovarImpute_data}
-\alias{example_data}
-\alias{example_DGE}
 \title{Simulated dataset and counts}
 \format{
 Two objects: A data frame with 500 rows and 5 variables and A DGElist with 500 genes and 500 samples
-
-An object of class \code{DGEList} with 500 rows and 500 columns.
 }
 \usage{
 data(RNAseqCovarImpute_data)
-
-example_DGE
 }
 \value{
 Tibble with 500 rows of data for variables x, y, and z

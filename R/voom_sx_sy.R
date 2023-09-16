@@ -12,7 +12,8 @@
 #' gene_bin_impute <- impute_by_gene_bin(example_data,
 #'     intervals,
 #'     example_DGE,
-#'     m = 2
+#'     m = 2,
+#'     param = SerialParam()
 #' )
 #' coef_se <- limmavoom_imputed_data_list(
 #'     gene_intervals = intervals,
@@ -20,7 +21,8 @@
 #'     imputed_data_list = gene_bin_impute,
 #'     m = 2,
 #'     voom_formula = "~x + y + z + a + b",
-#'     predictor = "x"
+#'     predictor = "x",
+#'     param = SerialParam()
 #' )
 #'
 #' final_res <- combine_rubins(
@@ -28,9 +30,8 @@
 #'     model_results = coef_se,
 #'     voom_formula = "~x + y + z + a + b"
 #' )
-#'
-#'@export
-#'@keywords internal
+#' @export
+#' @keywords internal
 voom_sx_sy <- function(counts,design=NULL,lib.size=NULL,normalize.method="none",block=NULL,correlation=NULL,weights=NULL,span=0.5,plot=FALSE,save.plot=FALSE, lib.size.all)
   #	Linear modelling of count data with mean-variance modelling at the observation level.
   #	Creates an EList object for entry to lmFit() etc in the limma pipeline.

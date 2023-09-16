@@ -5,28 +5,18 @@
 #' @return A dataframe with coefficient, standard error, sigma, and residual degrees of freedom values from limma-voom gene expression analysis. One row per gene and one set of values per imputed dataset.
 #' @param gene_intervals Output from get_gene_bin_intervals function. A dataframe where each row contains the start (first col) and end (second col) values for each gene bin interval.
 #' @param DGE A DGEList object.
-#' @param imputed_data_list Output from impute_by_gene_bin or impute_by_gene_bin_parallel.
+#' @param imputed_data_list Output from impute_by_gene_bin.
 #' @param m Number of imputed data sets.
 #' @param voom_formula Formula for design matrix.
 #' @param predictor Independent variable of interest. Must be a variable in voom_formula
 #'
-#' @importFrom foreach %do%
 #' @importFrom magrittr %>%
-#' @importFrom dplyr mutate
-#' @importFrom dplyr select
-#' @importFrom dplyr rename
-#' @importFrom dplyr as_tibble
-#' @importFrom dplyr all_of
-#' @importFrom foreach %do%
-#' @importFrom foreach foreach
+#' @importFrom dplyr mutate select rename as_tibble all_of bind_cols as_tibble
+#' @importFrom foreach %do% foreach
 #' @importFrom edgeR cpm
 #' @importFrom mice complete
-#' @importFrom dplyr bind_cols
-#' @importFrom dplyr as_tibble
-#' @importFrom stats model.matrix
-#' @importFrom stats as.formula
-#' @importFrom limma lmFit
-#' @importFrom limma normalizeBetweenArrays
+#' @importFrom stats model.matrix as.formula
+#' @importFrom limma lmFit normalizeBetweenArrays
 #' @importFrom rlang .data
 #' @importFrom dplyr left_join
 #'
@@ -36,7 +26,8 @@
 #' gene_bin_impute <- impute_by_gene_bin(example_data,
 #'     intervals,
 #'     example_DGE,
-#'     m = 2
+#'     m = 2,
+#'     param = SerialParam()
 #' )
 #' coef_se <- limmavoom_imputed_data_list(
 #'     gene_intervals = intervals,
@@ -44,7 +35,8 @@
 #'     imputed_data_list = gene_bin_impute,
 #'     m = 2,
 #'     voom_formula = "~x + y + z + a + b",
-#'     predictor = "x"
+#'     predictor = "x",
+#'     param = SerialParam()
 #' )
 #'
 #' final_res <- combine_rubins(
@@ -55,49 +47,36 @@
 #' @export
 
 
-limmavoom_imputed_data_list <- function(gene_intervals, DGE, imputed_data_list, m, voom_formula, predictor) {
-  # get mean-variance curve from all genes across all M imputations
-  sx_sy <- lowess_all_gene_bins(gene_intervals, DGE, imputed_data_list, m, voom_formula, predictor)
-  all_coefs_se <- foreach(gene_bin = seq(length(imputed_data_list)), .combine = "rbind") %do% {
-    # get imputed data
-    imputed_data <- imputed_data_list[[gene_bin]]
-    # get dge list for this gene interval
-    alldg_bin <- DGE[as.numeric(gene_intervals[gene_bin, 1]):as.numeric(gene_intervals[gene_bin, 2]), ]
-
-    all_coef_se_within_bin <- foreach(i = seq(m), .combine = "left_join") %do% {
-      # we have imputed data for a particular gene bin interval.
-      # now we get the ith imputed data set within
-      data_i <- complete(imputed_data, i)
-
-      # run limmavoom
-      design1 <- model.matrix(as.formula(voom_formula), data_i)
-      # This modified voom functions uses lowess sx and sy values for all genes across all M imps, not just the genes in this bin
-      voom1 <- voom_master_lowess(alldg_bin, design1, lib.size.all = DGE$samples$lib.size*DGE$samples$norm.factors, sx = sx_sy$sx, sy = sx_sy$sy)
-      fit1 <- lmFit(voom1)
-
-      # get coefficients unscaled SE, df residual, and sigma from fit1
-      coef <- fit1$coefficients %>%
-        as_tibble() %>%
-        dplyr::select(all_of(starts_with(predictor))) %>%
-        dplyr::rename(coef = all_of(starts_with(predictor)))
-
-      SE_unscaled <- fit1$stdev.unscaled * fit1$sigma
-      SE_unscaled <- as_tibble(SE_unscaled) %>%
-        dplyr::select(all_of(starts_with(predictor))) %>%
-        dplyr::rename(SE_unscaled = all_of(starts_with(predictor)))
-
-      degrees_freedom_residual <- fit1$df.residual
-
-      sigma <- fit1$sigma
-
-      output1 <- coef %>%
-        cbind(SE_unscaled) %>%
-        mutate(ENSEMBL = rownames(fit1),
-               sigma = sigma,
-               df_residual = degrees_freedom_residual)
-      # rename fit values to include info on which imputed data they come from
-      colnames(output1)[colnames(output1)!= "ENSEMBL"] <- paste0(colnames(output1)[colnames(output1)!= "ENSEMBL"],".",i)
-      output1
-    }
+limmavoom_imputed_data_list <- function(gene_intervals, DGE, imputed_data_list, m, voom_formula, predictor, param = bpparam()) {
+  # Validity tests
+  if (!class(DGE) %in% "DGEList") {
+    stop("Input 'DGE' is not a valid DGEList object.")
   }
+  if (!(class(m) %in% c("numeric"))) {
+    stop("Input 'm' must be numeric.")
+  }
+  if (!class(as.formula(voom_formula))%in% c("formula")) {
+    stop()
+  }
+  if (!(class(predictor) %in% c("character"))) {
+    stop("Input 'predictor' must be a character")
+  }
+  # Get mean-variance curve from all genes across all M imputations
+  sx_sy <- lowess_all_gene_bins(gene_intervals, DGE, imputed_data_list, m, voom_formula, predictor)
+  
+  # Parallelize the loop using bplapply
+  all_coefs_se <- bplapply(seq(length(imputed_data_list)),
+                           gene_intervals = gene_intervals,
+                           m = m,
+                           imputed_data = imputed_data_list, 
+                           DGE = DGE, 
+                           voom_formula = voom_formula, 
+                           predictor = predictor, 
+                           sx_sy = sx_sy,
+                           FUN = limmavoom_imputed_data_list_helper, 
+                           BPPARAM = param)
+  
+  all_coefs_se <- do.call(rbind, all_coefs_se)
+  return(all_coefs_se)
 }
+

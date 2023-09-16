@@ -21,7 +21,12 @@
 #' @examples
 #' data(RNAseqCovarImpute_data)
 #' @format Two objects: A data frame with 500 rows and 5 variables and A DGElist with 500 genes and 500 samples
-"example_data"
-
-#' @rdname RNAseqCovarImpute_data
-"example_DGE"
+NULL
+#' @name example_data
+#' @docType data
+#' @keywords data
+NULL
+#' @name example_DGE
+#' @docType data
+#' @keywords data
+NULL
