@@ -53,7 +53,7 @@ impute_by_gene_bin <- function(data, intervals, DGE, m, maxit = 10, param = bppa
   if (!class(DGE) %in% "DGEList") {
     stop("Input 'DGE' is not a valid DGEList object.")
   }
-  if (!(class(data) %in% c("tbl_df", "tbl", "data.frame"))) {
+  if (!any((class(data) %in% c("tbl_df", "tbl", "data.frame")))) {
     stop("Input 'data' is not a valid data.frame, tbl, or tbl_df object.")
   }
   if (!(class(m) %in% c("numeric"))) {

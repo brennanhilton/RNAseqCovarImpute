@@ -67,7 +67,7 @@ combine_rubins <- function(DGE, model_results, voom_formula, covariate = NULL, r
     if (!class(as.formula(voom_formula))%in% c("formula")) {
       stop()
     }
-    if (!(class(model_results) %in% c("tbl_df", "tbl", "data.frame"))) {
+    if (!any((class(model_results) %in% c("tbl_df", "tbl", "data.frame")))) {
       stop("Input 'predictor' must be a character")
     }
     # All residual dfs are the same (n-k-1)
