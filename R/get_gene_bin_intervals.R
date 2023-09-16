@@ -41,7 +41,7 @@ get_gene_bin_intervals <- function(DGE, data, n = 10) {
     if (!class(DGE) %in% "DGEList") {
       stop("Input 'DGE' is not a valid DGEList object.")
     }
-    if (!(class(data) %in% c("tbl_df", "tbl", "data.frame"))) {
+    if (!any((class(data) %in% c("tbl_df", "tbl", "data.frame")))) {
       stop("Input 'data' is not a valid data.frame, tbl, or tbl_df object.")
     }
     if (!(class(n) %in% c("numeric"))) {
