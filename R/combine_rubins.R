@@ -16,9 +16,9 @@
 #' @param DGE A DGEList object.
 #' @param model_results Output from limmavoom_imputed_datalist.
 #' @param voom_formula Formula for design matrix. Should be same formula used to create model_results.
-#' @param covariate Arguments passed to limma::squeezeVar.
-#' @param robust Arguments passed to limma::squeezeVar.
-#' @param winsor.tail.p Arguments passed to limma::squeezeVar.
+#' @param covariate Arguments passed to limma::squeezeVar. If non-NULL, var.prior will depend on this numeric covariate. Otherwise, var.prior is constant.
+#' @param robust Arguments passed to limma::squeezeVar. Llogical, should the estimation of df.prior and var.prior be robustified against outlier sample variances?
+#' @param winsor.tail.p Arguments passed to limma::squeezeVar. Numeric vector of length 1 or 2, giving left and right tail proportions of x to Winsorize. Used only when robust=TRUE.
 #'
 #' @importFrom magrittr %>%
 #' @importFrom dplyr select

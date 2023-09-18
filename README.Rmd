@@ -101,7 +101,7 @@ final_res <- combine_rubins(
 
 ```{r, message=FALSE, warning=FALSE, echo=FALSE}
 final_res %>%
-    dplyr::select(ENSEMBL, coef_combined, combined_p_bayes, combined_p_adj_bayes) %>%
+    dplyr::select(probe, coef_combined, combined_p_bayes, combined_p_adj_bayes) %>%
     head(10) %>%
     knitr::kable(digits = 3, caption = "The top 10 genes associated with predictor x sorted by lowest P-value")
 ```

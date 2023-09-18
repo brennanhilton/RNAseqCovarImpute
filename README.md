@@ -190,18 +190,18 @@ final_res <- combine_rubins(
 )
 ```
 
-| ENSEMBL | coef_combined | combined_p_bayes | combined_p_adj_bayes |
-|:--------|--------------:|-----------------:|---------------------:|
-| ENS432  |        -0.021 |            0.000 |                0.092 |
-| ENS65   |        -0.023 |            0.002 |                0.520 |
-| ENS239  |         0.015 |            0.006 |                0.838 |
-| ENS327  |        -0.010 |            0.007 |                0.838 |
-| ENS411  |         0.022 |            0.010 |                0.973 |
-| ENS260  |         0.011 |            0.014 |                0.973 |
-| ENS291  |         0.017 |            0.018 |                0.973 |
-| ENS219  |         0.013 |            0.021 |                0.973 |
-| ENS458  |         0.015 |            0.022 |                0.973 |
-| ENS13   |        -0.022 |            0.023 |                0.973 |
+| probe  | coef_combined | combined_p_bayes | combined_p_adj_bayes |
+|:-------|--------------:|-----------------:|---------------------:|
+| ENS432 |        -0.021 |            0.000 |                0.076 |
+| ENS65  |        -0.023 |            0.002 |                0.488 |
+| ENS327 |        -0.010 |            0.006 |                0.925 |
+| ENS239 |         0.015 |            0.007 |                0.925 |
+| ENS411 |         0.021 |            0.012 |                0.969 |
+| ENS260 |         0.011 |            0.017 |                0.969 |
+| ENS291 |         0.017 |            0.021 |                0.969 |
+| ENS458 |         0.015 |            0.023 |                0.969 |
+| ENS219 |         0.012 |            0.026 |                0.969 |
+| ENS107 |         0.007 |            0.029 |                0.969 |
 
 The top 10 genes associated with predictor x sorted by lowest P-value
 
@@ -242,17 +242,17 @@ expression matrices across each imputed dataset.
     ## [1] stats     graphics  grDevices utils     datasets  methods   base     
     ## 
     ## other attached packages:
-    ## [1] dplyr_1.1.0              RNAseqCovarImpute_0.99.0
+    ## [1] dplyr_1.1.0              RNAseqCovarImpute_0.99.7 BiocParallel_1.33.9     
     ## 
     ## loaded via a namespace (and not attached):
-    ##  [1] limma_3.55.5      compiler_4.3.0    tidyselect_1.2.0  Rcpp_1.0.10      
-    ##  [5] parallel_4.3.0    mice_3.15.0       tidyr_1.3.0       yaml_2.3.7       
-    ##  [9] fastmap_1.1.1     lattice_0.20-45   R6_2.5.1          generics_0.1.3   
-    ## [13] knitr_1.42        iterators_1.0.14  backports_1.4.1   tibble_3.2.0     
-    ## [17] pillar_1.8.1      rlang_1.0.6       utf8_1.2.3        broom_1.0.3      
-    ## [21] xfun_0.37         doParallel_1.0.17 cli_3.6.0         withr_2.5.0      
-    ## [25] magrittr_2.0.3    digest_0.6.31     foreach_1.5.2     grid_4.3.0       
-    ## [29] locfit_1.5-9.7    rstudioapi_0.14   edgeR_3.41.6      lifecycle_1.0.3  
-    ## [33] vctrs_0.5.2       evaluate_0.20     glue_1.6.2        codetools_0.2-19 
-    ## [37] fansi_1.0.4       rmarkdown_2.20    purrr_1.0.1       tools_4.3.0      
-    ## [41] pkgconfig_2.0.3   htmltools_0.5.4
+    ##  [1] limma_3.55.5     compiler_4.3.0   tidyselect_1.2.0 Rcpp_1.0.10     
+    ##  [5] parallel_4.3.0   mice_3.15.0      tidyr_1.3.0      yaml_2.3.7      
+    ##  [9] fastmap_1.1.1    lattice_0.20-45  R6_2.5.1         generics_0.1.3  
+    ## [13] knitr_1.43       iterators_1.0.14 backports_1.4.1  tibble_3.2.0    
+    ## [17] snow_0.4-4       pillar_1.9.0     rlang_1.1.1      utf8_1.2.3      
+    ## [21] broom_1.0.5      xfun_0.39        cli_3.6.0        withr_2.5.0     
+    ## [25] magrittr_2.0.3   digest_0.6.31    foreach_1.5.2    grid_4.3.0      
+    ## [29] locfit_1.5-9.7   rstudioapi_0.14  edgeR_3.41.6     lifecycle_1.0.3 
+    ## [33] vctrs_0.5.2      evaluate_0.21    glue_1.6.2       codetools_0.2-19
+    ## [37] fansi_1.0.4      rmarkdown_2.20   purrr_1.0.1      tools_4.3.0     
+    ## [41] pkgconfig_2.0.3  htmltools_0.5.4

@@ -20,11 +20,11 @@ combine_rubins(
 
 \item{voom_formula}{Formula for design matrix. Should be same formula used to create model_results.}
 
-\item{covariate}{Arguments passed to limma::squeezeVar.}
+\item{covariate}{Arguments passed to limma::squeezeVar. If non-NULL, var.prior will depend on this numeric covariate. Otherwise, var.prior is constant.}
 
-\item{robust}{Arguments passed to limma::squeezeVar.}
+\item{robust}{Arguments passed to limma::squeezeVar. Llogical, should the estimation of df.prior and var.prior be robustified against outlier sample variances?}
 
-\item{winsor.tail.p}{Arguments passed to limma::squeezeVar.}
+\item{winsor.tail.p}{Arguments passed to limma::squeezeVar. Numeric vector of length 1 or 2, giving left and right tail proportions of x to Winsorize. Used only when robust=TRUE.}
 }
 \value{
 Dataframe with one row per gene containing coefficients standard errors, degrees of freedom, t-statistics, P-Values, and adjusted P-values from the limma-voom pipeline.

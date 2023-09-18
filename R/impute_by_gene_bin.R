@@ -13,6 +13,7 @@
 #' @param maxit Used by mice function.
 #' @param param Arguments passed to BiocParallel::bpparam()
 #' 
+#' @importFrom BiocParallel bplapply
 #' @importFrom magrittr %>%
 #' @importFrom dplyr mutate bind_cols as_tibble
 #' @importFrom foreach %do% foreach

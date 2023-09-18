@@ -9,7 +9,9 @@
 #' @param m Number of imputed data sets.
 #' @param voom_formula Formula for design matrix.
 #' @param predictor Independent variable of interest. Must be a variable in voom_formula
+#' @param param Arguments passed to BiocParallel::bpparam()
 #'
+#' @importFrom BiocParallel bplapply
 #' @importFrom magrittr %>%
 #' @importFrom dplyr mutate select rename as_tibble all_of bind_cols as_tibble
 #' @importFrom foreach %do% foreach

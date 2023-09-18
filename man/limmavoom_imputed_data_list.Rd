@@ -26,6 +26,8 @@ limmavoom_imputed_data_list(
 \item{voom_formula}{Formula for design matrix.}
 
 \item{predictor}{Independent variable of interest. Must be a variable in voom_formula}
+
+\item{param}{Arguments passed to BiocParallel::bpparam()}
 }
 \value{
 A dataframe with coefficient, standard error, sigma, and residual degrees of freedom values from limma-voom gene expression analysis. One row per gene and one set of values per imputed dataset.
