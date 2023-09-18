@@ -1,6 +1,5 @@
-#' Simulated dataset and counts
+#' Simulated dataset
 #'
-#' I created the `RNAseqCovarImpute_data` dataset to show how to use the package functions. 
 #' The exact code used to generate these data are found in the Example_Data_for_RNAseqCovarImpute
 #' vignette. In short, `example_data` contains 500 rows with data for variables x, y, and z, which
 #' are continuous normally distributed, and a and b, which are binary variables. Missigness
@@ -8,25 +7,21 @@
 #' 24.2% of participants. `example_DGE` contains random count data from the Poisson distribution
 #' for 500 made up genes, ENS1-ENS500
 #'
+#' @format ## `example_data`
+#' data frame with 500 rows and 5 variables
 #' \describe{
-#' \item{example_data}{random covariate data for 5 variables with 24.2% missingness}
-#' \item{example_DGE}{random count data for 500 made up genes in a DGElist}
+#' \item{x}{continuous normally distributed}
+#' \item{y}{continuous normally distributed}
+#' \item{z}{continuous normally distributed}
+#' \item{a}{binary}
+#' \item{b}{binary}
 #' ...
 #' }
 #' @return Tibble with 500 rows of data for variables x, y, and z
 #' @docType data
 #' @keywords datasets
-#' @name RNAseqCovarImpute_data
-#' @usage data(RNAseqCovarImpute_data)
-#' @examples
-#' data(RNAseqCovarImpute_data)
-#' @format Two objects: A data frame with 500 rows and 5 variables and A DGElist with 500 genes and 500 samples
-NULL
 #' @name example_data
-#' @docType data
-#' @keywords data
-NULL
-#' @name example_DGE
-#' @docType data
-#' @keywords data
-NULL
+#' @usage data(example_data)
+#' @examples
+#' data(example_data)
+"example_data"

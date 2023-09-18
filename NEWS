@@ -4,3 +4,8 @@ Changes in version 0.99.0 (2023-04-23)
 Changes in version 0.99.7 (2023-09-16)
 + Parallel now implemented with BiocParallel
 + Added validity tests
+
+Changes in version 0.99.8 (2023-09-18)
++ replaced RNAseqCovarImpute_data.RData with two individual rda files for example_DGE and example_data
++ added documentation for the package (?RNAseqCovarImpute)
++ added unit test structure and some basic unit tests

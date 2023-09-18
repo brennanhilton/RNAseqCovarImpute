@@ -1,6 +1,6 @@
 Package: RNAseqCovarImpute
 Title: Impute Covariate Data in RNA Sequencing Studies
-Version: 0.99.7
+Version: 0.99.8
 Authors@R: c(
     person("Brennan", "Baker", email = "brennanhilton@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-5459-9141")),
@@ -17,7 +17,13 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 VignetteBuilder: knitr
 biocViews: RNASeq, GeneExpression, DifferentialExpression, Sequencing
-Suggests: BiocStyle, knitr, rmarkdown, tidyr, stringr
+Suggests: 
+    BiocStyle,
+    knitr,
+    rmarkdown,
+    tidyr,
+    stringr,
+    testthat (>= 3.0.0)
 Depends: R (>= 4.3.0), BiocParallel
 Imports:
     Biobase,
@@ -29,3 +35,4 @@ Imports:
     edgeR,
     foreach,
     mice
+Config/testthat/edition: 3

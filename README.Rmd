@@ -32,7 +32,8 @@ Normally you would have your own covariate and RNA-sequencing data. We generated
 ```{r message=FALSE, warning=FALSE}
 library(RNAseqCovarImpute)
 library(dplyr)
-data(RNAseqCovarImpute_data)
+data(example_data)
+data(example_DGE)
 ```
 
 # RNAseqCovarImpute Demonstration

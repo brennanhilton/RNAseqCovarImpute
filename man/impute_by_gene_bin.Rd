@@ -30,7 +30,8 @@ if n = 100 and intervals contains 200 gene bin intervals, output will be a list 
 using only the genes in one gene bin.
 }
 \examples{
-data(RNAseqCovarImpute_data)
+data(example_data)
+data(example_DGE)
 intervals <- get_gene_bin_intervals(example_DGE, example_data, n = 10)
 gene_bin_impute <- impute_by_gene_bin(example_data,
     intervals,
