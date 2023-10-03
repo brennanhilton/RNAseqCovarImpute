@@ -12,7 +12,7 @@
 #' @param m Number of imputed data sets.
 #' @param maxit Used by mice function.
 #' @param param Arguments passed to BiocParallel::bpparam()
-#' 
+#'
 #' @importFrom magrittr %>%
 #' @importFrom dplyr mutate bind_cols as_tibble
 #' @importFrom foreach %do% foreach
@@ -49,16 +49,16 @@
 #' @keywords internal
 # Define a function for imputation that will be called by bplapply
 impute_gene_bin_helper <- function(i, intervals, cpm_all, data, m, maxit) {
-  # Extract cpm for the current bin of genes based on the interval
-  cpm_bin <- cpm_all[as.numeric(intervals[i, 1]):as.numeric(intervals[i, 2]), ] %>%
-    t() %>%
-    as_tibble()
-  
-  # Add the bin of genes to the covariate data
-  data_mice <- data %>% bind_cols(cpm_bin)
-  
-  # Impute the data using mice
-  imputed_data <- mice(data_mice, m = m, maxit = maxit, predictorMatrix = quickpred(data_mice))
-  
-  return(imputed_data)
+    # Extract cpm for the current bin of genes based on the interval
+    cpm_bin <- cpm_all[as.numeric(intervals[i, 1]):as.numeric(intervals[i, 2]), ] %>%
+        t() %>%
+        as_tibble()
+
+    # Add the bin of genes to the covariate data
+    data_mice <- data %>% bind_cols(cpm_bin)
+
+    # Impute the data using mice
+    imputed_data <- mice(data_mice, m = m, maxit = maxit, predictorMatrix = quickpred(data_mice))
+
+    return(imputed_data)
 }

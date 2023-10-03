@@ -51,14 +51,13 @@ rownames(mat) <- annot$ENSEMBL
 # Make DGE list and set rownames to ENSEMBL gene numbers above
 example_DGE <- DGEList(mat, genes = annot)
 rownames(example_DGE) <- annot$ENSEMBL
-
 ```
 
 # Simulate missingness in the random data
 Now we simulate missingness in the random data generated above using the mice ampute function. The below code simulates missingness in the data for all but the first variable (x), which we consider the main predictor of interest in this example. See the ampute documentation for more details. 
 ```{r, message=FALSE, warning=FALSE}
 # First get all combos of 0 or 1 for the 4 other variables (y, z, a, and b)
-pattern_vars <- expand.grid(c(0,1), c(0,1), c(0,1), c(0,1))
+pattern_vars <- expand.grid(c(0, 1), c(0, 1), c(0, 1), c(0, 1))
 # Then add back a column for the predictor of interest, which is never amputed, so the first col =1 the whole way down
 pattern2 <- matrix(1, nrow = nrow(pattern_vars), ncol = 1)
 pattern1 <- cbind(pattern2, pattern_vars)

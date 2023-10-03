@@ -6,10 +6,10 @@
 #' was simulated for all variables other than x such that a complete case analysis would drop
 #' 24.2% of participants. `example_DGE` contains random count data from the Poisson distribution
 #' for 500 made up genes, ENS1-ENS500
-#' 
+#'
 #' @format ## `example_DGE`
 #' A DGElist with 500 genes and 500 samples
-#' 
+#'
 #' @return DGElist for 500 made up genes, ENS1-ENS500
 #' @docType data
 #' @keywords datasets

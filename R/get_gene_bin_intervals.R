@@ -40,15 +40,15 @@
 get_gene_bin_intervals <- function(DGE, data, n = 10) {
     # Validity tests
     if (!class(DGE) %in% "DGEList") {
-      stop("Input 'DGE' is not a valid DGEList object.")
+        stop("Input 'DGE' is not a valid DGEList object.")
     }
     if (!any((class(data) %in% c("tbl_df", "tbl", "data.frame")))) {
-      stop("Input 'data' is not a valid data.frame, tbl, or tbl_df object.")
+        stop("Input 'data' is not a valid data.frame, tbl, or tbl_df object.")
     }
     if (!(class(n) %in% c("numeric"))) {
-      stop("Input 'n' must be numeric.")
+        stop("Input 'n' must be numeric.")
     }
-  
+
     gene_number <- as.numeric(nrow(DGE))
     genes_per_bin <- floor(nrow(data) / n) # Recommended 10 to 1 individuals to genes ratio so default n is 10
     bins <- floor(gene_number / genes_per_bin)

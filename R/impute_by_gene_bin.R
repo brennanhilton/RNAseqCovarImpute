@@ -12,7 +12,7 @@
 #' @param m Number of imputed data sets.
 #' @param maxit Used by mice function.
 #' @param param Arguments passed to BiocParallel::bpparam()
-#' 
+#'
 #' @importFrom BiocParallel bplapply
 #' @importFrom magrittr %>%
 #' @importFrom dplyr mutate bind_cols as_tibble
@@ -51,30 +51,31 @@
 
 # Define the function to perform parallel imputation using bplapply
 impute_by_gene_bin <- function(data, intervals, DGE, m, maxit = 10, param = bpparam()) {
-  # Validity tests
-  if (!class(DGE) %in% "DGEList") {
-    stop("Input 'DGE' is not a valid DGEList object.")
-  }
-  if (!any((class(data) %in% c("tbl_df", "tbl", "data.frame")))) {
-    stop("Input 'data' is not a valid data.frame, tbl, or tbl_df object.")
-  }
-  if (!(class(m) %in% c("numeric"))) {
-    stop("Input 'm' must be numeric.")
-  }
-  if (!(class(maxit) %in% c("numeric"))) {
-    stop("Input 'maxit' must be numeric.")
-  }
-  # get the counts per million for all genes in DGE
-  cpm_all <- cpm(example_DGE, log = TRUE, prior.count = 5)
-  
-  gene_bin_impute <- bplapply(seq(nrow(intervals)), 
-                              impute_gene_bin_helper,
-                              intervals = intervals,
-                              cpm_all = cpm_all,
-                              data = data,
-                              m = m,
-                              maxit = maxit,
-                              BPPARAM = param)
-  
-  return(gene_bin_impute)
+    # Validity tests
+    if (!class(DGE) %in% "DGEList") {
+        stop("Input 'DGE' is not a valid DGEList object.")
+    }
+    if (!any((class(data) %in% c("tbl_df", "tbl", "data.frame")))) {
+        stop("Input 'data' is not a valid data.frame, tbl, or tbl_df object.")
+    }
+    if (!(class(m) %in% c("numeric"))) {
+        stop("Input 'm' must be numeric.")
+    }
+    if (!(class(maxit) %in% c("numeric"))) {
+        stop("Input 'maxit' must be numeric.")
+    }
+    # get the counts per million for all genes in DGE
+    cpm_all <- cpm(DGE, log = TRUE, prior.count = 5)
+
+    gene_bin_impute <- bplapply(seq(nrow(intervals)),
+        impute_gene_bin_helper,
+        intervals = intervals,
+        cpm_all = cpm_all,
+        data = data,
+        m = m,
+        maxit = maxit,
+        BPPARAM = param
+    )
+
+    return(gene_bin_impute)
 }

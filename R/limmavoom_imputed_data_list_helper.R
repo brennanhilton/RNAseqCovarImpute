@@ -47,47 +47,49 @@
 #' @export
 #' @keywords internal
 limmavoom_imputed_data_list_helper <- function(gene_bin, gene_intervals, DGE, imputed_data_list, m, voom_formula, predictor, sx_sy) {
-  # get mean-variance curve from all genes across all M imputations
-  
-        # get imputed data
-        imputed_data <- imputed_data_list[[gene_bin]]
-        # get dge list for this gene interval
-        alldg_bin <- DGE[as.numeric(gene_intervals[gene_bin, 1]):as.numeric(gene_intervals[gene_bin, 2]), ]
+    # get mean-variance curve from all genes across all M imputations
 
-        all_coef_se_within_bin <- foreach(i = seq(m), .combine = "left_join") %do% {
-            # we have imputed data for a particular gene bin interval.
-            # now we get the ith imputed data set within
-            data_i <- complete(imputed_data, i)
-          
-            # run limmavoom
-            design1 <- model.matrix(as.formula(voom_formula), data_i)
-          
-            voom1 <- voom_master_lowess(alldg_bin, design1, lib.size.all = DGE$samples$lib.size*DGE$samples$norm.factors, sx = sx_sy$sx, sy = sx_sy$sy)
-            fit1 <- lmFit(voom1)
-          
-            # get coefficients unscaled SE, df residual, and sigma from fit1
-            coef <- fit1$coefficients %>%
-                as_tibble() %>%
-                dplyr::select(all_of(starts_with(predictor))) %>%
-                dplyr::rename(coef = all_of(starts_with(predictor)))
-          
-            SE_unscaled <- fit1$stdev.unscaled * fit1$sigma
-            SE_unscaled <- as_tibble(SE_unscaled) %>%
-                dplyr::select(all_of(starts_with(predictor))) %>%
-                dplyr::rename(SE_unscaled = all_of(starts_with(predictor)))
-          
-            degrees_freedom_residual <- fit1$df.residual
-          
-            sigma <- fit1$sigma
-          
-            output1 <- coef %>%
-                cbind(SE_unscaled) %>%
-                mutate(probe = rownames(fit1),
-                       sigma = sigma,
-                       df_residual = degrees_freedom_residual)
-            # rename fit values to include info on which imputed data they come from
-            colnames(output1)[colnames(output1)!= "probe"] <- paste0(colnames(output1)[colnames(output1)!= "probe"],".",i)
-            output1
-        }
-        return(all_coef_se_within_bin)
+    # get imputed data
+    imputed_data <- imputed_data_list[[gene_bin]]
+    # get dge list for this gene interval
+    alldg_bin <- DGE[as.numeric(gene_intervals[gene_bin, 1]):as.numeric(gene_intervals[gene_bin, 2]), ]
+
+    all_coef_se_within_bin <- foreach(i = seq(m), .combine = "left_join") %do% {
+        # we have imputed data for a particular gene bin interval.
+        # now we get the ith imputed data set within
+        data_i <- complete(imputed_data, i)
+
+        # run limmavoom
+        design1 <- model.matrix(as.formula(voom_formula), data_i)
+
+        voom1 <- voom_master_lowess(alldg_bin, design1, lib.size.all = DGE$samples$lib.size * DGE$samples$norm.factors, sx = sx_sy$sx, sy = sx_sy$sy)
+        fit1 <- lmFit(voom1)
+
+        # get coefficients unscaled SE, df residual, and sigma from fit1
+        coef <- fit1$coefficients %>%
+            as_tibble() %>%
+            dplyr::select(all_of(starts_with(predictor))) %>%
+            dplyr::rename(coef = all_of(starts_with(predictor)))
+
+        SE_unscaled <- fit1$stdev.unscaled * fit1$sigma
+        SE_unscaled <- as_tibble(SE_unscaled) %>%
+            dplyr::select(all_of(starts_with(predictor))) %>%
+            dplyr::rename(SE_unscaled = all_of(starts_with(predictor)))
+
+        degrees_freedom_residual <- fit1$df.residual
+
+        sigma <- fit1$sigma
+
+        output1 <- coef %>%
+            cbind(SE_unscaled) %>%
+            mutate(
+                probe = rownames(fit1),
+                sigma = sigma,
+                df_residual = degrees_freedom_residual
+            )
+        # rename fit values to include info on which imputed data they come from
+        colnames(output1)[colnames(output1) != "probe"] <- paste0(colnames(output1)[colnames(output1) != "probe"], ".", i)
+        output1
+    }
+    return(all_coef_se_within_bin)
 }

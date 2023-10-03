@@ -63,13 +63,13 @@
 combine_rubins <- function(DGE, model_results, voom_formula, covariate = NULL, robust = FALSE, winsor.tail.p = c(0.05, 0.1)) {
     # Validity tests
     if (!class(DGE) %in% "DGEList") {
-      stop("Input 'DGE' is not a valid DGEList object.")
+        stop("Input 'DGE' is not a valid DGEList object.")
     }
-    if (!class(as.formula(voom_formula))%in% c("formula")) {
-      stop()
+    if (!class(as.formula(voom_formula)) %in% c("formula")) {
+        stop()
     }
     if (!any((class(model_results) %in% c("tbl_df", "tbl", "data.frame")))) {
-      stop("Input 'predictor' must be a character")
+        stop("Input 'predictor' must be a character")
     }
     # All residual dfs are the same (n-k-1)
     df_residual <- model_results$df_residual.1

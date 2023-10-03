@@ -20,8 +20,9 @@ install_github("brennanhilton/RNAseqCovarImpute")
 
 # Install from Bioconductor (not yet on Bioconductor)
 
-if (!require("BiocManager", quietly = TRUE))
+if (!require("BiocManager", quietly = TRUE)) {
     install.packages("BiocManager")
+}
 
 BiocManager::install("RNAseqCovarImpute")
 ```
