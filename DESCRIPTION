@@ -18,7 +18,7 @@ Description: The RNAseqCovarImpute package implements multiple imputation of mis
     before applying the squeezeVar function to apply a variance shrinking Bayesian procedure to each M set of model results, 
     5) Pooling the results with Rubins’ rules to produce combined coefficients, standard errors, and P-values, and 6) 
     Adjusting P-values for multiplicity to account for false discovery rate (FDR).
-License: GPL (>=2)
+License: GPL-3 + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
