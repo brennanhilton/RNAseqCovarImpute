@@ -1,6 +1,6 @@
 Package: RNAseqCovarImpute
 Title: Impute Covariate Data in RNA Sequencing Studies
-Version: 0.99.10
+Version: 0.99.11
 Authors@R: c(
     person("Brennan", "Baker", email = "brennanhilton@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-5459-9141")),
@@ -18,7 +18,7 @@ Description: The RNAseqCovarImpute package implements multiple imputation of mis
     before applying the squeezeVar function to apply a variance shrinking Bayesian procedure to each M set of model results, 
     5) Pooling the results with Rubins’ rules to produce combined coefficients, standard errors, and P-values, and 6) 
     Adjusting P-values for multiplicity to account for false discovery rate (FDR).
-License: GPL-3 + file LICENSE
+License: GPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3

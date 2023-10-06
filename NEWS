@@ -14,3 +14,6 @@ Changes in version 0.99.10 (2023-10-06)
 + No longer exports internal functions
 + License to GPL-3 + file LICENSE
 + Updated vignette introduction
+
+Changes in version 0.99.11 (2023-10-06)
++ License to GPL-3
