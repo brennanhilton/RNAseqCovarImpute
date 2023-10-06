@@ -6,6 +6,11 @@ Changes in version 0.99.7 (2023-09-16)
 + Added validity tests
 
 Changes in version 0.99.8 (2023-09-18)
-+ replaced RNAseqCovarImpute_data.RData with two individual rda files for example_DGE and example_data
-+ added documentation for the package (?RNAseqCovarImpute)
-+ added unit test structure and some basic unit tests
++ Replaced RNAseqCovarImpute_data.RData with two individual rda files for example_DGE and example_data
++ Added documentation for the package (?RNAseqCovarImpute)
++ Added unit test structure and some basic unit tests
+
+Changes in version 0.99.10 (2023-10-06)
++ No longer exports internal functions
++ License to GPL(>2)
++ Updated vignette introduction

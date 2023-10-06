@@ -1,12 +1,13 @@
-test_that("multiplication works", {
+test_that("consistent results", {
     data(example_data)
     data(example_DGE)
+    library(BiocParallel)
     intervals <- get_gene_bin_intervals(example_DGE, example_data, n = 10)
     gene_bin_impute <- impute_by_gene_bin(example_data,
         intervals,
         example_DGE,
         m = 2,
-        param = SerialParam(RNGseed = 2023)
+        BPPARAM = SerialParam(RNGseed = 2023)
     )
     coef_se <- limmavoom_imputed_data_list(
         gene_intervals = intervals,
@@ -15,7 +16,7 @@ test_that("multiplication works", {
         m = 2,
         voom_formula = "~x + y + z + a + b",
         predictor = "x",
-        param = SerialParam(RNGseed = 2023)
+        BPPARAM = SerialParam(RNGseed = 2023)
     )
     final_res <- combine_rubins(
         DGE = example_DGE,

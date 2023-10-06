@@ -10,6 +10,7 @@
 #' @param voom_formula Formula for design matrix.
 #' @param predictor Independent variable of interest. Must be a variable in voom_formula.
 #'
+#' @include voom_master_lowess.R
 #' @importFrom magrittr %>%
 #' @importFrom dplyr mutate bind_cols as_tibble left_join
 #' @importFrom foreach %do% foreach
@@ -19,32 +20,6 @@
 #' @importFrom rlang .data
 #' @importFrom limma normalizeBetweenArrays lmFit
 #'
-#' @examples
-#' data(example_data)
-#' data(example_DGE)
-#' intervals <- get_gene_bin_intervals(example_DGE, example_data, n = 10)
-#' gene_bin_impute <- impute_by_gene_bin(example_data,
-#'     intervals,
-#'     example_DGE,
-#'     m = 2,
-#'     param = SerialParam()
-#' )
-#' coef_se <- limmavoom_imputed_data_list(
-#'     gene_intervals = intervals,
-#'     DGE = example_DGE,
-#'     imputed_data_list = gene_bin_impute,
-#'     m = 2,
-#'     voom_formula = "~x + y + z + a + b",
-#'     predictor = "x",
-#'     param = SerialParam()
-#' )
-#'
-#' final_res <- combine_rubins(
-#'     DGE = example_DGE,
-#'     model_results = coef_se,
-#'     voom_formula = "~x + y + z + a + b"
-#' )
-#' @export
 #' @keywords internal
 limmavoom_imputed_data_list_helper <- function(gene_bin, gene_intervals, DGE, imputed_data_list, m, voom_formula, predictor, sx_sy) {
     # get mean-variance curve from all genes across all M imputations

@@ -20,32 +20,6 @@
 #' @importFrom mice mice quickpred
 #' @importFrom rlang .data
 #'
-#' @examples
-#' data(example_data)
-#' data(example_DGE)
-#' intervals <- get_gene_bin_intervals(example_DGE, example_data, n = 10)
-#' gene_bin_impute <- impute_by_gene_bin(example_data,
-#'     intervals,
-#'     example_DGE,
-#'     m = 2,
-#'     param = SerialParam()
-#' )
-#' coef_se <- limmavoom_imputed_data_list(
-#'     gene_intervals = intervals,
-#'     DGE = example_DGE,
-#'     imputed_data_list = gene_bin_impute,
-#'     m = 2,
-#'     voom_formula = "~x + y + z + a + b",
-#'     predictor = "x",
-#'     param = SerialParam()
-#' )
-#'
-#' final_res <- combine_rubins(
-#'     DGE = example_DGE,
-#'     model_results = coef_se,
-#'     voom_formula = "~x + y + z + a + b"
-#' )
-#' @export
 #' @keywords internal
 # Define a function for imputation that will be called by bplapply
 impute_gene_bin_helper <- function(i, intervals, cpm_all, data, m, maxit) {

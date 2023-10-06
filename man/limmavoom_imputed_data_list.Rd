@@ -11,7 +11,7 @@ limmavoom_imputed_data_list(
   m,
   voom_formula,
   predictor,
-  param = bpparam()
+  BPPARAM = bpparam()
 )
 }
 \arguments{
@@ -27,7 +27,7 @@ limmavoom_imputed_data_list(
 
 \item{predictor}{Independent variable of interest. Must be a variable in voom_formula}
 
-\item{param}{Arguments passed to BiocParallel::bpparam()}
+\item{BPPARAM}{A BiocParallelParam object}
 }
 \value{
 A dataframe with coefficient, standard error, sigma, and residual degrees of freedom values from limma-voom gene expression analysis. One row per gene and one set of values per imputed dataset.
@@ -43,8 +43,7 @@ intervals <- get_gene_bin_intervals(example_DGE, example_data, n = 10)
 gene_bin_impute <- impute_by_gene_bin(example_data,
     intervals,
     example_DGE,
-    m = 2,
-    param = SerialParam()
+    m = 2
 )
 coef_se <- limmavoom_imputed_data_list(
     gene_intervals = intervals,
@@ -52,8 +51,7 @@ coef_se <- limmavoom_imputed_data_list(
     imputed_data_list = gene_bin_impute,
     m = 2,
     voom_formula = "~x + y + z + a + b",
-    predictor = "x",
-    param = SerialParam()
+    predictor = "x"
 )
 
 final_res <- combine_rubins(

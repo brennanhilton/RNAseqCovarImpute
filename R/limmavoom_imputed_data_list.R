@@ -9,9 +9,11 @@
 #' @param m Number of imputed data sets.
 #' @param voom_formula Formula for design matrix.
 #' @param predictor Independent variable of interest. Must be a variable in voom_formula
-#' @param param Arguments passed to BiocParallel::bpparam()
+#' @param BPPARAM A BiocParallelParam object
 #'
-#' @importFrom BiocParallel bplapply
+#' @include limmavoom_imputed_data_list_helper.R
+#' @include lowess_all_gene_bins.R
+#' @importFrom BiocParallel bpparam bplapply
 #' @importFrom magrittr %>%
 #' @importFrom dplyr mutate select rename as_tibble all_of bind_cols as_tibble
 #' @importFrom foreach %do% foreach
@@ -29,8 +31,7 @@
 #' gene_bin_impute <- impute_by_gene_bin(example_data,
 #'     intervals,
 #'     example_DGE,
-#'     m = 2,
-#'     param = SerialParam()
+#'     m = 2
 #' )
 #' coef_se <- limmavoom_imputed_data_list(
 #'     gene_intervals = intervals,
@@ -38,8 +39,7 @@
 #'     imputed_data_list = gene_bin_impute,
 #'     m = 2,
 #'     voom_formula = "~x + y + z + a + b",
-#'     predictor = "x",
-#'     param = SerialParam()
+#'     predictor = "x"
 #' )
 #'
 #' final_res <- combine_rubins(
@@ -50,7 +50,7 @@
 #' @export
 
 
-limmavoom_imputed_data_list <- function(gene_intervals, DGE, imputed_data_list, m, voom_formula, predictor, param = bpparam()) {
+limmavoom_imputed_data_list <- function(gene_intervals, DGE, imputed_data_list, m, voom_formula, predictor, BPPARAM = bpparam()) {
     # Validity tests
     if (!class(DGE) %in% "DGEList") {
         stop("Input 'DGE' is not a valid DGEList object.")
@@ -77,7 +77,7 @@ limmavoom_imputed_data_list <- function(gene_intervals, DGE, imputed_data_list, 
         predictor = predictor,
         sx_sy = sx_sy,
         FUN = limmavoom_imputed_data_list_helper,
-        BPPARAM = param
+        BPPARAM = BPPARAM
     )
 
     all_coefs_se <- do.call(rbind, all_coefs_se)

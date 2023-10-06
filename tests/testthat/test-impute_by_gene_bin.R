@@ -5,8 +5,7 @@ test_that("impute_by_gene_bin outputs mids", {
     gene_bin_impute <- impute_by_gene_bin(example_data,
         intervals,
         example_DGE,
-        m = 2,
-        param = SerialParam()
+        m = 2
     )
     expect_s3_class(gene_bin_impute[[1]], "mids")
 })

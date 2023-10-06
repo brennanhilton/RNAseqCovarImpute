@@ -14,38 +14,11 @@ lowess_all_gene_bins(
 )
 }
 \value{
-All sx and sy values for lowess function across all M imputation.
+All sx and sy values for lowess function across all M imputations.
 }
 \description{
 Loops through all bins and all M imputations, prepares DGE and design to run
 voom_sx_sy, which fits gene-wise linear models and extracts log count size (sx)
 and sqrt resudual standard deviations (sy) to make the lowess curve
-}
-\examples{
-data(example_data)
-data(example_DGE)
-intervals <- get_gene_bin_intervals(example_DGE, example_data, n = 10)
-gene_bin_impute <- impute_by_gene_bin(example_data,
-    intervals,
-    example_DGE,
-    m = 2,
-    param = SerialParam()
-)
-coef_se <- limmavoom_imputed_data_list(
-    gene_intervals = intervals,
-    DGE = example_DGE,
-    imputed_data_list = gene_bin_impute,
-    m = 2,
-    voom_formula = "~x + y + z + a + b",
-    predictor = "x",
-    param = SerialParam()
-)
-
-final_res <- combine_rubins(
-    DGE = example_DGE,
-    model_results = coef_se,
-    voom_formula = "~x + y + z + a + b"
-)
-
 }
 \keyword{internal}

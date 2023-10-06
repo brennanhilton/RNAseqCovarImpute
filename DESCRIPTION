@@ -1,6 +1,6 @@
 Package: RNAseqCovarImpute
 Title: Impute Covariate Data in RNA Sequencing Studies
-Version: 0.99.9
+Version: 0.99.10
 Authors@R: c(
     person("Brennan", "Baker", email = "brennanhilton@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-5459-9141")),
@@ -10,8 +10,15 @@ Authors@R: c(
     person("Alison", "Paquette", role = "aut"))    
 URL: https://github.com/brennanhilton/RNAseqCovarImpute
 BugReports: https://github.com/brennanhilton/RNAseqCovarImpute/issues
-Description: The RNAseqCovarImpute package implements multiple imputation of missing covariates and differential gene expression analysis by: 1) Randomly binning genes into smaller groups, 2) Creating M imputed datasets separately within each bin, where the imputation predictor matrix includes all covariates and the log counts per million (CPM) for the genes within each bin, 3) Estimating gene expression changes using voom followed by lmFit functions, separately on each M imputed dataset within each gene bin, 4) Un-binning the gene sets and stacking the M sets of model results before applying the squeezeVar function to apply a variance shrinking Bayesian procedure to each M set of model results, 5) Pooling the results with Rubins’ rules to produce combined coefficients, standard errors, and P-values, and 6) Adjusting P-values for multiplicity to account for false discovery rate (FDR).
-License: GPL (>= 3)
+Description: The RNAseqCovarImpute package implements multiple imputation of missing covariates and differential gene 
+    expression analysis by: 1) Randomly binning genes into smaller groups, 2) Creating M imputed datasets separately 
+    within each bin, where the imputation predictor matrix includes all covariates and the log counts per million (CPM) 
+    for the genes within each bin, 3) Estimating gene expression changes using voom followed by lmFit functions, separately 
+    on each M imputed dataset within each gene bin, 4) Un-binning the gene sets and stacking the M sets of model results 
+    before applying the squeezeVar function to apply a variance shrinking Bayesian procedure to each M set of model results, 
+    5) Pooling the results with Rubins’ rules to produce combined coefficients, standard errors, and P-values, and 6) 
+    Adjusting P-values for multiplicity to account for false discovery rate (FDR).
+License: GPL (>=2)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
@@ -24,9 +31,10 @@ Suggests:
     tidyr,
     stringr,
     testthat (>= 3.0.0)
-Depends: R (>= 4.3.0), BiocParallel
+Depends: R (>= 4.3.0)
 Imports:
     Biobase,
+    BiocParallel,
     stats,
     limma,
     dplyr,
@@ -36,3 +44,16 @@ Imports:
     foreach,
     mice
 Config/testthat/edition: 3
+Collate: 
+    'RNAseqCovarImpute-package.R'
+    'combine_rubins.R'
+    'example_DGE.R'
+    'example_data.R'
+    'get_gene_bin_intervals.R'
+    'impute_by_gene_bin_helper.R'
+    'impute_by_gene_bin.R'
+    'voom_sx_sy.R'
+    'lowess_all_gene_bins.R'
+    'voom_master_lowess.R'
+    'limmavoom_imputed_data_list_helper.R'
+    'limmavoom_imputed_data_list.R'

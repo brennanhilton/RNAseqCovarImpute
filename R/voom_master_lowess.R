@@ -4,36 +4,10 @@
 #' Allows input of bins of outcome genes while still accounting for the total library size
 #' of all outcome genes, as the total library size is needed to calculate log-cpm values.
 #' Also allows use of external sx and sy to create lowess curve. Here, sx and sy should
-#' come from all gene bins across all M imputations.
-#' @return Same as normal voom.
+#' come from all gene bins across all M imputations. Adapted from limma::voom.
+#' Code from limma covered by License: GPL (>=2)
+#' @return Same as limma::voom.
 #'
-#' @examples
-#' data(example_data)
-#' data(example_DGE)
-#' intervals <- get_gene_bin_intervals(example_DGE, example_data, n = 10)
-#' gene_bin_impute <- impute_by_gene_bin(example_data,
-#'     intervals,
-#'     example_DGE,
-#'     m = 2,
-#'     param = SerialParam()
-#' )
-#' coef_se <- limmavoom_imputed_data_list(
-#'     gene_intervals = intervals,
-#'     DGE = example_DGE,
-#'     imputed_data_list = gene_bin_impute,
-#'     m = 2,
-#'     voom_formula = "~x + y + z + a + b",
-#'     predictor = "x",
-#'     param = SerialParam()
-#' )
-#'
-#' final_res <- combine_rubins(
-#'     DGE = example_DGE,
-#'     model_results = coef_se,
-#'     voom_formula = "~x + y + z + a + b"
-#' )
-#'
-#' @export
 #' @keywords internal
 voom_master_lowess <- function(counts, design=NULL, lib.size=NULL, normalize.method="none", block=NULL, correlation=NULL, weights=NULL, span=0.5, plot=FALSE, save.plot=FALSE, lib.size.all, sx, sy)
     # 	Linear modelling of count data with mean-variance modelling at the observation level.

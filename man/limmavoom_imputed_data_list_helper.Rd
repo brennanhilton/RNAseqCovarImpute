@@ -35,30 +35,4 @@ A dataframe with coefficient, standard error, sigma, and residual degrees of fre
 Loops through the imputed data list (output from "impute_by_gene_bin" function)
 and runs limma-voom RNA seq analysis.
 }
-\examples{
-data(example_data)
-data(example_DGE)
-intervals <- get_gene_bin_intervals(example_DGE, example_data, n = 10)
-gene_bin_impute <- impute_by_gene_bin(example_data,
-    intervals,
-    example_DGE,
-    m = 2,
-    param = SerialParam()
-)
-coef_se <- limmavoom_imputed_data_list(
-    gene_intervals = intervals,
-    DGE = example_DGE,
-    imputed_data_list = gene_bin_impute,
-    m = 2,
-    voom_formula = "~x + y + z + a + b",
-    predictor = "x",
-    param = SerialParam()
-)
-
-final_res <- combine_rubins(
-    DGE = example_DGE,
-    model_results = coef_se,
-    voom_formula = "~x + y + z + a + b"
-)
-}
 \keyword{internal}

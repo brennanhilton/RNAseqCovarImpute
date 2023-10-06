@@ -3,6 +3,14 @@ Impute Covariate Data in RNA-sequencing Studies
 
 # Introduction
 
+The RNAseqCovarImpute package makes linear model analysis for RNA-seq
+read counts compatible with multiple imputation of missing covariates.
+Relying on the Bioconductor `limma` package, RNAseqCovarImpute is
+included in Bioconductor as an extension of the [variance modeling at
+the observational level (voom)
+method](https://doi.org/10.1186/gb-2014-15-2-r29) which can be applied
+in circumstances with missing covariate data.
+
 Missing data is a common problem in observational studies, as modeling
 techniques such as linear regression cannot be fit to data with missing
 points. Missing data is frequently handled using complete case analyses
@@ -29,13 +37,14 @@ binning genes into smaller groups, 2) creating M imputed datasets
 separately within each bin, where the imputation predictor matrix
 includes all covariates and the log counts per million (CPM) for the
 genes within each bin, 3) estimating gene expression changes using
-`voom` followed by `lmFit` functions, separately on each M imputed
-dataset within each gene bin, 4) un-binning the gene sets and stacking
-the M sets of model results before applying the `squeezeVar` function to
-apply a variance shrinking Bayesian procedure to each M set of model
-results, 5) pooling the results with Rubins’ rules to produce combined
-coefficients, standard errors, and P-values, and 6) adjusting P-values
-for multiplicity to account for false discovery rate (FDR).
+`limma::voom` followed by `limma::lmFit` functions, separately on each M
+imputed dataset within each gene bin, 4) un-binning the gene sets and
+stacking the M sets of model results before applying the
+`limma::squeezeVar` function to apply a variance shrinking Bayesian
+procedure to each M set of model results, 5) pooling the results with
+Rubins’ rules to produce combined coefficients, standard errors, and
+P-values, and 6) adjusting P-values for multiplicity to account for
+false discovery rate (FDR).
 
 # Installation
 
@@ -46,8 +55,9 @@ install_github("brennanhilton/RNAseqCovarImpute")
 
 # Install from Bioconductor (not yet on Bioconductor)
 
-if (!require("BiocManager", quietly = TRUE))
+if (!require("BiocManager", quietly = TRUE)) {
     install.packages("BiocManager")
+}
 
 BiocManager::install("RNAseqCovarImpute")
 ```
@@ -68,12 +78,28 @@ for 500 made up genes, ENS1-ENS500
 ``` r
 library(RNAseqCovarImpute)
 library(dplyr)
-data(RNAseqCovarImpute_data)
+```
+
+    ## 
+    ## Attaching package: 'dplyr'
+
+    ## The following objects are masked from 'package:stats':
+    ## 
+    ##     filter, lag
+
+    ## The following objects are masked from 'package:base':
+    ## 
+    ##     intersect, setdiff, setequal, union
+
+``` r
+library(BiocParallel)
+data(example_data)
+data(example_DGE)
 ```
 
 # RNAseqCovarImpute Demonstration
 
-## 1: Bin the genes into smaller groups
+## Bin the genes into smaller groups
 
 The default is approximately 1 gene per 10 individuals in the study, but
 the user can specify a different ratio. For example, in a study with 500
@@ -119,7 +145,7 @@ annot <- annot[sample(seq_len(nrow(annot))), ]
 example_DGE <- example_DGE[annot, ]
 ```
 
-## 2: Make imputed data sets for each bin of genes and conduct differential expression analysis
+## Make imputed data sets for each bin of genes and conduct differential expression analysis
 
 Data are imputed using the mice R package with its default predictive
 modeling methods, which are predictive mean matching, logistic
@@ -137,10 +163,7 @@ gene bin intervals from the `get_gene_bin_intervals` function. It
 returns a list of sets of m imputed datasets, one per gene bin. For
 instance, if m = 100 and intervals contains 200 gene bin intervals,
 output will be a list of 200 sets of 100 imputed datasets. Each of the
-200 sets are imputed using only the genes in one gene bin. This same
-procedure can be run more quickly in parallel with the
-`impute_by_gene_bin_parallel` function, which uses the ‘PSOCK’ backend
-implemented via the doParallel package.
+200 sets are imputed using only the genes in one gene bin.
 
 ``` r
 gene_bin_impute <- impute_by_gene_bin(example_data,
@@ -150,14 +173,680 @@ gene_bin_impute <- impute_by_gene_bin(example_data,
 )
 ```
 
-## 3: Estimate gene expression changes using voom followed by lmFit functions, separately on each M imputed dataset within each gene bin
+    ## 
+    ##  iter imp variable
+    ##   1   1  y  z  a  b
+    ##   1   2  y  z  a  b
+    ##   1   3  y  z  a  b
+    ##   2   1  y  z  a  b
+    ##   2   2  y  z  a  b
+    ##   2   3  y  z  a  b
+    ##   3   1  y  z  a  b
+    ##   3   2  y  z  a  b
+    ##   3   3  y  z  a  b
+    ##   4   1  y  z  a  b
+    ##   4   2  y  z  a  b
+    ##   4   3  y  z  a  b
+    ##   5   1  y  z  a  b
+    ##   5   2  y  z  a  b
+    ##   5   3  y  z  a  b
+    ##   6   1  y  z  a  b
+    ##   6   2  y  z  a  b
+    ##   6   3  y  z  a  b
+    ##   7   1  y  z  a  b
+    ##   7   2  y  z  a  b
+    ##   7   3  y  z  a  b
+    ##   8   1  y  z  a  b
+    ##   8   2  y  z  a  b
+    ##   8   3  y  z  a  b
+    ##   9   1  y  z  a  b
+    ##   9   2  y  z  a  b
+    ##   9   3  y  z  a  b
+    ##   10   1  y  z  a  b
+    ##   10   2  y  z  a  b
+    ##   10   3  y  z  a  b
+    ## 
+    ## 
+    ##  iter imp variable
+    ##   1   1  y  z  a  b
+    ##   1   2  y  z  a  b
+    ##   1   3  y  z  a  b
+    ##   2   1  y  z  a  b
+    ##   2   2  y  z  a  b
+    ##   2   3  y  z  a  b
+    ##   3   1  y  z  a  b
+    ##   3   2  y  z  a  b
+    ##   3   3  y  z  a  b
+    ##   4   1  y  z  a  b
+    ##   4   2  y  z  a  b
+    ##   4   3  y  z  a  b
+    ##   5   1  y  z  a  b
+    ##   5   2  y  z  a  b
+    ##   5   3  y  z  a  b
+    ##   6   1  y  z  a  b
+    ##   6   2  y  z  a  b
+    ##   6   3  y  z  a  b
+    ##   7   1  y  z  a  b
+    ##   7   2  y  z  a  b
+    ##   7   3  y  z  a  b
+    ##   8   1  y  z  a  b
+    ##   8   2  y  z  a  b
+    ##   8   3  y  z  a  b
+    ##   9   1  y  z  a  b
+    ##   9   2  y  z  a  b
+    ##   9   3  y  z  a  b
+    ##   10   1  y  z  a  b
+    ##   10   2  y  z  a  b
+    ##   10   3  y  z  a  b
+    ## 
+    ## 
+    ##  iter imp variable
+    ##   1   1  y  z  a  b
+    ##   1   2  y  z  a  b
+    ##   1   3  y  z  a  b
+    ##   2   1  y  z  a  b
+    ##   2   2  y  z  a  b
+    ##   2   3  y  z  a  b
+    ##   3   1  y  z  a  b
+    ##   3   2  y  z  a  b
+    ##   3   3  y  z  a  b
+    ##   4   1  y  z  a  b
+    ##   4   2  y  z  a  b
+    ##   4   3  y  z  a  b
+    ##   5   1  y  z  a  b
+    ##   5   2  y  z  a  b
+    ##   5   3  y  z  a  b
+    ##   6   1  y  z  a  b
+    ##   6   2  y  z  a  b
+    ##   6   3  y  z  a  b
+    ##   7   1  y  z  a  b
+    ##   7   2  y  z  a  b
+    ##   7   3  y  z  a  b
+    ##   8   1  y  z  a  b
+    ##   8   2  y  z  a  b
+    ##   8   3  y  z  a  b
+    ##   9   1  y  z  a  b
+    ##   9   2  y  z  a  b
+    ##   9   3  y  z  a  b
+    ##   10   1  y  z  a  b
+    ##   10   2  y  z  a  b
+    ##   10   3  y  z  a  b
+    ## 
+    ## 
+    ##  iter imp variable
+    ##   1   1  y  z  a  b
+    ##   1   2  y  z  a  b
+    ##   1   3  y  z  a  b
+    ##   2   1  y  z  a  b
+    ##   2   2  y  z  a  b
+    ##   2   3  y  z  a  b
+    ##   3   1  y  z  a  b
+    ##   3   2  y  z  a  b
+    ##   3   3  y  z  a  b
+    ##   4   1  y  z  a  b
+    ##   4   2  y  z  a  b
+    ##   4   3  y  z  a  b
+    ##   5   1  y  z  a  b
+    ##   5   2  y  z  a  b
+    ##   5   3  y  z  a  b
+    ##   6   1  y  z  a  b
+    ##   6   2  y  z  a  b
+    ##   6   3  y  z  a  b
+    ##   7   1  y  z  a  b
+    ##   7   2  y  z  a  b
+    ##   7   3  y  z  a  b
+    ##   8   1  y  z  a  b
+    ##   8   2  y  z  a  b
+    ##   8   3  y  z  a  b
+    ##   9   1  y  z  a  b
+    ##   9   2  y  z  a  b
+    ##   9   3  y  z  a  b
+    ##   10   1  y  z  a  b
+    ##   10   2  y  z  a  b
+    ##   10   3  y  z  a  b
+    ## 
+    ## 
+    ##  iter imp variable
+    ##   1   1  y  z  a  b
+    ##   1   2  y  z  a  b
+    ##   1   3  y  z  a  b
+    ##   2   1  y  z  a  b
+    ##   2   2  y  z  a  b
+    ##   2   3  y  z  a  b
+    ##   3   1  y  z  a  b
+    ##   3   2  y  z  a  b
+    ##   3   3  y  z  a  b
+    ##   4   1  y  z  a  b
+    ##   4   2  y  z  a  b
+    ##   4   3  y  z  a  b
+    ##   5   1  y  z  a  b
+    ##   5   2  y  z  a  b
+    ##   5   3  y  z  a  b
+    ##   6   1  y  z  a  b
+    ##   6   2  y  z  a  b
+    ##   6   3  y  z  a  b
+    ##   7   1  y  z  a  b
+    ##   7   2  y  z  a  b
+    ##   7   3  y  z  a  b
+    ##   8   1  y  z  a  b
+    ##   8   2  y  z  a  b
+    ##   8   3  y  z  a  b
+    ##   9   1  y  z  a  b
+    ##   9   2  y  z  a  b
+    ##   9   3  y  z  a  b
+    ##   10   1  y  z  a  b
+    ##   10   2  y  z  a  b
+    ##   10   3  y  z  a  b
+    ## 
+    ## 
+    ##  iter imp variable
+    ##   1   1  y  z  a  b
+    ##   1   2  y  z  a  b
+    ##   1   3  y  z  a  b
+    ##   2   1  y  z  a  b
+    ##   2   2  y  z  a  b
+    ##   2   3  y  z  a  b
+    ##   3   1  y  z  a  b
+    ##   3   2  y  z  a  b
+    ##   3   3  y  z  a  b
+    ##   4   1  y  z  a  b
+    ##   4   2  y  z  a  b
+    ##   4   3  y  z  a  b
+    ##   5   1  y  z  a  b
+    ##   5   2  y  z  a  b
+    ##   5   3  y  z  a  b
+    ##   6   1  y  z  a  b
+    ##   6   2  y  z  a  b
+    ##   6   3  y  z  a  b
+    ##   7   1  y  z  a  b
+    ##   7   2  y  z  a  b
+    ##   7   3  y  z  a  b
+    ##   8   1  y  z  a  b
+    ##   8   2  y  z  a  b
+    ##   8   3  y  z  a  b
+    ##   9   1  y  z  a  b
+    ##   9   2  y  z  a  b
+    ##   9   3  y  z  a  b
+    ##   10   1  y  z  a  b
+    ##   10   2  y  z  a  b
+    ##   10   3  y  z  a  b
+    ## 
+    ## 
+    ##  iter imp variable
+    ##   1   1  y  z  a  b
+    ##   1   2  y  z  a  b
+    ##   1   3  y  z  a  b
+    ##   2   1  y  z  a  b
+    ##   2   2  y  z  a  b
+    ##   2   3  y  z  a  b
+    ##   3   1  y  z  a  b
+    ##   3   2  y  z  a  b
+    ##   3   3  y  z  a  b
+    ##   4   1  y  z  a  b
+    ##   4   2  y  z  a  b
+    ##   4   3  y  z  a  b
+    ##   5   1  y  z  a  b
+    ##   5   2  y  z  a  b
+    ##   5   3  y  z  a  b
+    ##   6   1  y  z  a  b
+    ##   6   2  y  z  a  b
+    ##   6   3  y  z  a  b
+    ##   7   1  y  z  a  b
+    ##   7   2  y  z  a  b
+    ##   7   3  y  z  a  b
+    ##   8   1  y  z  a  b
+    ##   8   2  y  z  a  b
+    ##   8   3  y  z  a  b
+    ##   9   1  y  z  a  b
+    ##   9   2  y  z  a  b
+    ##   9   3  y  z  a  b
+    ##   10   1  y  z  a  b
+    ##   10   2  y  z  a  b
+    ##   10   3  y  z  a  b
+    ## 
+    ## 
+    ##  iter imp variable
+    ##   1   1  y  z  a  b
+    ##   1   2  y  z  a  b
+    ##   1   3  y  z  a  b
+    ##   2   1  y  z  a  b
+    ##   2   2  y  z  a  b
+    ##   2   3  y  z  a  b
+    ##   3   1  y  z  a  b
+    ##   3   2  y  z  a  b
+    ##   3   3  y  z  a  b
+    ##   4   1  y  z  a  b
+    ##   4   2  y  z  a  b
+    ##   4   3  y  z  a  b
+    ##   5   1  y  z  a  b
+    ##   5   2  y  z  a  b
+    ##   5   3  y  z  a  b
+    ##   6   1  y  z  a  b
+    ##   6   2  y  z  a  b
+    ##   6   3  y  z  a  b
+    ##   7   1  y  z  a  b
+    ##   7   2  y  z  a  b
+    ##   7   3  y  z  a  b
+    ##   8   1  y  z  a  b
+    ##   8   2  y  z  a  b
+    ##   8   3  y  z  a  b
+    ##   9   1  y  z  a  b
+    ##   9   2  y  z  a  b
+    ##   9   3  y  z  a  b
+    ##   10   1  y  z  a  b
+    ##   10   2  y  z  a  b
+    ##   10   3  y  z  a  b
+    ## 
+    ## 
+    ##  iter imp variable
+    ##   1   1  y  z  a  b
+    ##   1   2  y  z  a  b
+    ##   1   3  y  z  a  b
+    ##   2   1  y  z  a  b
+    ##   2   2  y  z  a  b
+    ##   2   3  y  z  a  b
+    ##   3   1  y  z  a  b
+    ##   3   2  y  z  a  b
+    ##   3   3  y  z  a  b
+    ##   4   1  y  z  a  b
+    ##   4   2  y  z  a  b
+    ##   4   3  y  z  a  b
+    ##   5   1  y  z  a  b
+    ##   5   2  y  z  a  b
+    ##   5   3  y  z  a  b
+    ##   6   1  y  z  a  b
+    ##   6   2  y  z  a  b
+    ##   6   3  y  z  a  b
+    ##   7   1  y  z  a  b
+    ##   7   2  y  z  a  b
+    ##   7   3  y  z  a  b
+    ##   8   1  y  z  a  b
+    ##   8   2  y  z  a  b
+    ##   8   3  y  z  a  b
+    ##   9   1  y  z  a  b
+    ##   9   2  y  z  a  b
+    ##   9   3  y  z  a  b
+    ##   10   1  y  z  a  b
+    ##   10   2  y  z  a  b
+    ##   10   3  y  z  a  b
+    ## 
+    ## 
+    ##  iter imp variable
+    ##   1   1  y  z  a  b
+    ##   1   2  y  z  a  b
+    ##   1   3  y  z  a  b
+    ##   2   1  y  z  a  b
+    ##   2   2  y  z  a  b
+    ##   2   3  y  z  a  b
+    ##   3   1  y  z  a  b
+    ##   3   2  y  z  a  b
+    ##   3   3  y  z  a  b
+    ##   4   1  y  z  a  b
+    ##   4   2  y  z  a  b
+    ##   4   3  y  z  a  b
+    ##   5   1  y  z  a  b
+    ##   5   2  y  z  a  b
+    ##   5   3  y  z  a  b
+    ##   6   1  y  z  a  b
+    ##   6   2  y  z  a  b
+    ##   6   3  y  z  a  b
+    ##   7   1  y  z  a  b
+    ##   7   2  y  z  a  b
+    ##   7   3  y  z  a  b
+    ##   8   1  y  z  a  b
+    ##   8   2  y  z  a  b
+    ##   8   3  y  z  a  b
+    ##   9   1  y  z  a  b
+    ##   9   2  y  z  a  b
+    ##   9   3  y  z  a  b
+    ##   10   1  y  z  a  b
+    ##   10   2  y  z  a  b
+    ##   10   3  y  z  a  b
+
+This procedure is run in parallel using the BiocParallel package with
+the default back-end. Users can change the back-end using the `BPPARAM`
+argument. This argument is passed to `BiocParallel::bplapply`. For
+instance, to run `gene_bin_impute` in serial:
+
+``` r
+gene_bin_impute <- impute_by_gene_bin(example_data,
+    intervals,
+    example_DGE,
+    m = 3,
+    BPPARAM = SerialParam()
+)
+```
+
+    ## 
+    ##  iter imp variable
+    ##   1   1  y  z  a  b
+    ##   1   2  y  z  a  b
+    ##   1   3  y  z  a  b
+    ##   2   1  y  z  a  b
+    ##   2   2  y  z  a  b
+    ##   2   3  y  z  a  b
+    ##   3   1  y  z  a  b
+    ##   3   2  y  z  a  b
+    ##   3   3  y  z  a  b
+    ##   4   1  y  z  a  b
+    ##   4   2  y  z  a  b
+    ##   4   3  y  z  a  b
+    ##   5   1  y  z  a  b
+    ##   5   2  y  z  a  b
+    ##   5   3  y  z  a  b
+    ##   6   1  y  z  a  b
+    ##   6   2  y  z  a  b
+    ##   6   3  y  z  a  b
+    ##   7   1  y  z  a  b
+    ##   7   2  y  z  a  b
+    ##   7   3  y  z  a  b
+    ##   8   1  y  z  a  b
+    ##   8   2  y  z  a  b
+    ##   8   3  y  z  a  b
+    ##   9   1  y  z  a  b
+    ##   9   2  y  z  a  b
+    ##   9   3  y  z  a  b
+    ##   10   1  y  z  a  b
+    ##   10   2  y  z  a  b
+    ##   10   3  y  z  a  b
+    ## 
+    ##  iter imp variable
+    ##   1   1  y  z  a  b
+    ##   1   2  y  z  a  b
+    ##   1   3  y  z  a  b
+    ##   2   1  y  z  a  b
+    ##   2   2  y  z  a  b
+    ##   2   3  y  z  a  b
+    ##   3   1  y  z  a  b
+    ##   3   2  y  z  a  b
+    ##   3   3  y  z  a  b
+    ##   4   1  y  z  a  b
+    ##   4   2  y  z  a  b
+    ##   4   3  y  z  a  b
+    ##   5   1  y  z  a  b
+    ##   5   2  y  z  a  b
+    ##   5   3  y  z  a  b
+    ##   6   1  y  z  a  b
+    ##   6   2  y  z  a  b
+    ##   6   3  y  z  a  b
+    ##   7   1  y  z  a  b
+    ##   7   2  y  z  a  b
+    ##   7   3  y  z  a  b
+    ##   8   1  y  z  a  b
+    ##   8   2  y  z  a  b
+    ##   8   3  y  z  a  b
+    ##   9   1  y  z  a  b
+    ##   9   2  y  z  a  b
+    ##   9   3  y  z  a  b
+    ##   10   1  y  z  a  b
+    ##   10   2  y  z  a  b
+    ##   10   3  y  z  a  b
+    ## 
+    ##  iter imp variable
+    ##   1   1  y  z  a  b
+    ##   1   2  y  z  a  b
+    ##   1   3  y  z  a  b
+    ##   2   1  y  z  a  b
+    ##   2   2  y  z  a  b
+    ##   2   3  y  z  a  b
+    ##   3   1  y  z  a  b
+    ##   3   2  y  z  a  b
+    ##   3   3  y  z  a  b
+    ##   4   1  y  z  a  b
+    ##   4   2  y  z  a  b
+    ##   4   3  y  z  a  b
+    ##   5   1  y  z  a  b
+    ##   5   2  y  z  a  b
+    ##   5   3  y  z  a  b
+    ##   6   1  y  z  a  b
+    ##   6   2  y  z  a  b
+    ##   6   3  y  z  a  b
+    ##   7   1  y  z  a  b
+    ##   7   2  y  z  a  b
+    ##   7   3  y  z  a  b
+    ##   8   1  y  z  a  b
+    ##   8   2  y  z  a  b
+    ##   8   3  y  z  a  b
+    ##   9   1  y  z  a  b
+    ##   9   2  y  z  a  b
+    ##   9   3  y  z  a  b
+    ##   10   1  y  z  a  b
+    ##   10   2  y  z  a  b
+    ##   10   3  y  z  a  b
+    ## 
+    ##  iter imp variable
+    ##   1   1  y  z  a  b
+    ##   1   2  y  z  a  b
+    ##   1   3  y  z  a  b
+    ##   2   1  y  z  a  b
+    ##   2   2  y  z  a  b
+    ##   2   3  y  z  a  b
+    ##   3   1  y  z  a  b
+    ##   3   2  y  z  a  b
+    ##   3   3  y  z  a  b
+    ##   4   1  y  z  a  b
+    ##   4   2  y  z  a  b
+    ##   4   3  y  z  a  b
+    ##   5   1  y  z  a  b
+    ##   5   2  y  z  a  b
+    ##   5   3  y  z  a  b
+    ##   6   1  y  z  a  b
+    ##   6   2  y  z  a  b
+    ##   6   3  y  z  a  b
+    ##   7   1  y  z  a  b
+    ##   7   2  y  z  a  b
+    ##   7   3  y  z  a  b
+    ##   8   1  y  z  a  b
+    ##   8   2  y  z  a  b
+    ##   8   3  y  z  a  b
+    ##   9   1  y  z  a  b
+    ##   9   2  y  z  a  b
+    ##   9   3  y  z  a  b
+    ##   10   1  y  z  a  b
+    ##   10   2  y  z  a  b
+    ##   10   3  y  z  a  b
+    ## 
+    ##  iter imp variable
+    ##   1   1  y  z  a  b
+    ##   1   2  y  z  a  b
+    ##   1   3  y  z  a  b
+    ##   2   1  y  z  a  b
+    ##   2   2  y  z  a  b
+    ##   2   3  y  z  a  b
+    ##   3   1  y  z  a  b
+    ##   3   2  y  z  a  b
+    ##   3   3  y  z  a  b
+    ##   4   1  y  z  a  b
+    ##   4   2  y  z  a  b
+    ##   4   3  y  z  a  b
+    ##   5   1  y  z  a  b
+    ##   5   2  y  z  a  b
+    ##   5   3  y  z  a  b
+    ##   6   1  y  z  a  b
+    ##   6   2  y  z  a  b
+    ##   6   3  y  z  a  b
+    ##   7   1  y  z  a  b
+    ##   7   2  y  z  a  b
+    ##   7   3  y  z  a  b
+    ##   8   1  y  z  a  b
+    ##   8   2  y  z  a  b
+    ##   8   3  y  z  a  b
+    ##   9   1  y  z  a  b
+    ##   9   2  y  z  a  b
+    ##   9   3  y  z  a  b
+    ##   10   1  y  z  a  b
+    ##   10   2  y  z  a  b
+    ##   10   3  y  z  a  b
+    ## 
+    ##  iter imp variable
+    ##   1   1  y  z  a  b
+    ##   1   2  y  z  a  b
+    ##   1   3  y  z  a  b
+    ##   2   1  y  z  a  b
+    ##   2   2  y  z  a  b
+    ##   2   3  y  z  a  b
+    ##   3   1  y  z  a  b
+    ##   3   2  y  z  a  b
+    ##   3   3  y  z  a  b
+    ##   4   1  y  z  a  b
+    ##   4   2  y  z  a  b
+    ##   4   3  y  z  a  b
+    ##   5   1  y  z  a  b
+    ##   5   2  y  z  a  b
+    ##   5   3  y  z  a  b
+    ##   6   1  y  z  a  b
+    ##   6   2  y  z  a  b
+    ##   6   3  y  z  a  b
+    ##   7   1  y  z  a  b
+    ##   7   2  y  z  a  b
+    ##   7   3  y  z  a  b
+    ##   8   1  y  z  a  b
+    ##   8   2  y  z  a  b
+    ##   8   3  y  z  a  b
+    ##   9   1  y  z  a  b
+    ##   9   2  y  z  a  b
+    ##   9   3  y  z  a  b
+    ##   10   1  y  z  a  b
+    ##   10   2  y  z  a  b
+    ##   10   3  y  z  a  b
+    ## 
+    ##  iter imp variable
+    ##   1   1  y  z  a  b
+    ##   1   2  y  z  a  b
+    ##   1   3  y  z  a  b
+    ##   2   1  y  z  a  b
+    ##   2   2  y  z  a  b
+    ##   2   3  y  z  a  b
+    ##   3   1  y  z  a  b
+    ##   3   2  y  z  a  b
+    ##   3   3  y  z  a  b
+    ##   4   1  y  z  a  b
+    ##   4   2  y  z  a  b
+    ##   4   3  y  z  a  b
+    ##   5   1  y  z  a  b
+    ##   5   2  y  z  a  b
+    ##   5   3  y  z  a  b
+    ##   6   1  y  z  a  b
+    ##   6   2  y  z  a  b
+    ##   6   3  y  z  a  b
+    ##   7   1  y  z  a  b
+    ##   7   2  y  z  a  b
+    ##   7   3  y  z  a  b
+    ##   8   1  y  z  a  b
+    ##   8   2  y  z  a  b
+    ##   8   3  y  z  a  b
+    ##   9   1  y  z  a  b
+    ##   9   2  y  z  a  b
+    ##   9   3  y  z  a  b
+    ##   10   1  y  z  a  b
+    ##   10   2  y  z  a  b
+    ##   10   3  y  z  a  b
+    ## 
+    ##  iter imp variable
+    ##   1   1  y  z  a  b
+    ##   1   2  y  z  a  b
+    ##   1   3  y  z  a  b
+    ##   2   1  y  z  a  b
+    ##   2   2  y  z  a  b
+    ##   2   3  y  z  a  b
+    ##   3   1  y  z  a  b
+    ##   3   2  y  z  a  b
+    ##   3   3  y  z  a  b
+    ##   4   1  y  z  a  b
+    ##   4   2  y  z  a  b
+    ##   4   3  y  z  a  b
+    ##   5   1  y  z  a  b
+    ##   5   2  y  z  a  b
+    ##   5   3  y  z  a  b
+    ##   6   1  y  z  a  b
+    ##   6   2  y  z  a  b
+    ##   6   3  y  z  a  b
+    ##   7   1  y  z  a  b
+    ##   7   2  y  z  a  b
+    ##   7   3  y  z  a  b
+    ##   8   1  y  z  a  b
+    ##   8   2  y  z  a  b
+    ##   8   3  y  z  a  b
+    ##   9   1  y  z  a  b
+    ##   9   2  y  z  a  b
+    ##   9   3  y  z  a  b
+    ##   10   1  y  z  a  b
+    ##   10   2  y  z  a  b
+    ##   10   3  y  z  a  b
+    ## 
+    ##  iter imp variable
+    ##   1   1  y  z  a  b
+    ##   1   2  y  z  a  b
+    ##   1   3  y  z  a  b
+    ##   2   1  y  z  a  b
+    ##   2   2  y  z  a  b
+    ##   2   3  y  z  a  b
+    ##   3   1  y  z  a  b
+    ##   3   2  y  z  a  b
+    ##   3   3  y  z  a  b
+    ##   4   1  y  z  a  b
+    ##   4   2  y  z  a  b
+    ##   4   3  y  z  a  b
+    ##   5   1  y  z  a  b
+    ##   5   2  y  z  a  b
+    ##   5   3  y  z  a  b
+    ##   6   1  y  z  a  b
+    ##   6   2  y  z  a  b
+    ##   6   3  y  z  a  b
+    ##   7   1  y  z  a  b
+    ##   7   2  y  z  a  b
+    ##   7   3  y  z  a  b
+    ##   8   1  y  z  a  b
+    ##   8   2  y  z  a  b
+    ##   8   3  y  z  a  b
+    ##   9   1  y  z  a  b
+    ##   9   2  y  z  a  b
+    ##   9   3  y  z  a  b
+    ##   10   1  y  z  a  b
+    ##   10   2  y  z  a  b
+    ##   10   3  y  z  a  b
+    ## 
+    ##  iter imp variable
+    ##   1   1  y  z  a  b
+    ##   1   2  y  z  a  b
+    ##   1   3  y  z  a  b
+    ##   2   1  y  z  a  b
+    ##   2   2  y  z  a  b
+    ##   2   3  y  z  a  b
+    ##   3   1  y  z  a  b
+    ##   3   2  y  z  a  b
+    ##   3   3  y  z  a  b
+    ##   4   1  y  z  a  b
+    ##   4   2  y  z  a  b
+    ##   4   3  y  z  a  b
+    ##   5   1  y  z  a  b
+    ##   5   2  y  z  a  b
+    ##   5   3  y  z  a  b
+    ##   6   1  y  z  a  b
+    ##   6   2  y  z  a  b
+    ##   6   3  y  z  a  b
+    ##   7   1  y  z  a  b
+    ##   7   2  y  z  a  b
+    ##   7   3  y  z  a  b
+    ##   8   1  y  z  a  b
+    ##   8   2  y  z  a  b
+    ##   8   3  y  z  a  b
+    ##   9   1  y  z  a  b
+    ##   9   2  y  z  a  b
+    ##   9   3  y  z  a  b
+    ##   10   1  y  z  a  b
+    ##   10   2  y  z  a  b
+    ##   10   3  y  z  a  b
+
+## Estimate gene expression changes using voom followed by lmFit functions, separately on each M imputed dataset within each gene bin
 
 The `limmavoom_imputed_data_list` function loops through the imputed
 data list (output from `impute_by_gene_bin` function) and runs RNA-seq
 analysis with the limma-voom pipeline. Users specify the formula for the
 RNA-seq design matrix and the main predictor of interest for which log
-fold-changes will be estimated. This procedure can also be run in
-parallel with the `limmavoom_imputed_data_list_parallel` function.
+fold-changes will be estimated. This procedure can also be run with a
+different parallel back-end or in serial using the `BPPARAM` argument as
+above.
 
 ``` r
 coef_se <- limmavoom_imputed_data_list(
@@ -170,7 +859,37 @@ coef_se <- limmavoom_imputed_data_list(
 )
 ```
 
-## 4-6: Apply variance shrinking Bayesian procedure, pooling results with Rubins’ rules, and FDR-adjust P-values
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## 
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## 
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## 
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## 
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## 
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## 
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## 
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## 
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## 
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+
+## Apply variance shrinking Bayesian procedure, pooling results with Rubins’ rules, and FDR-adjust P-values
 
 The final step is to combine the results from each imputed dataset using
 Rubin’s rules. The argument “model_results” is the output from the
@@ -179,8 +898,7 @@ function applies the `squeezeVar` function before pooling results. The
 result is a table with one row per gene. The table includes coefficients
 (e.g., logFC values) standard errors, degrees of freedom, t-statistics,
 P-Values, and adjusted P-values from the limma-voom pipeline. Both the
-raw and empirical Bayes moderated statistics are reported (see limma
-package for details).
+raw and empirical Bayes moderated statistics are reported.
 
 ``` r
 final_res <- combine_rubins(
@@ -192,32 +910,18 @@ final_res <- combine_rubins(
 
 | probe  | coef_combined | combined_p_bayes | combined_p_adj_bayes |
 |:-------|--------------:|-----------------:|---------------------:|
-| ENS432 |        -0.021 |            0.000 |                0.076 |
-| ENS65  |        -0.023 |            0.002 |                0.488 |
-| ENS327 |        -0.010 |            0.006 |                0.925 |
-| ENS239 |         0.015 |            0.007 |                0.925 |
-| ENS411 |         0.021 |            0.012 |                0.969 |
-| ENS260 |         0.011 |            0.017 |                0.969 |
-| ENS291 |         0.017 |            0.021 |                0.969 |
-| ENS458 |         0.015 |            0.023 |                0.969 |
-| ENS219 |         0.012 |            0.026 |                0.969 |
-| ENS107 |         0.007 |            0.029 |                0.969 |
+| ENS432 |        -0.021 |            0.000 |                0.099 |
+| ENS65  |        -0.023 |            0.002 |                0.416 |
+| ENS239 |         0.015 |            0.007 |                0.828 |
+| ENS327 |        -0.010 |            0.007 |                0.828 |
+| ENS411 |         0.022 |            0.011 |                0.969 |
+| ENS260 |         0.011 |            0.014 |                0.969 |
+| ENS107 |         0.007 |            0.021 |                0.969 |
+| ENS219 |         0.013 |            0.022 |                0.969 |
+| ENS458 |         0.015 |            0.022 |                0.969 |
+| ENS13  |        -0.022 |            0.024 |                0.969 |
 
 The top 10 genes associated with predictor x sorted by lowest P-value
-
-# Downstream gene set / pathway analysis
-
-The compatibility of pathway and gene set enrichment methods with
-multiple imputation depends on their inputs. The RNAseqCovarImpute
-multiple imputation method produces one final list of genes with their
-associated t-statistics, log fold changes, and P-values for differential
-expression. Thus, the method is compatible with gene set enrichment
-analyses that utilize gene rankings such as ora, or gene level
-statistics such as `camera`, and `gage`. However, RNAseqCovarImpute is
-not compatible with gene set enrichment analyses that require as input a
-gene expression matrix or data at the individual sample level, as the
-nature of multiple imputation requires the creation of multiple gene
-expression matrices across each imputed dataset.
 
 # Session info
 
@@ -242,7 +946,8 @@ expression matrices across each imputed dataset.
     ## [1] stats     graphics  grDevices utils     datasets  methods   base     
     ## 
     ## other attached packages:
-    ## [1] dplyr_1.1.0              RNAseqCovarImpute_0.99.7 BiocParallel_1.33.9     
+    ## [1] BiocParallel_1.33.9       dplyr_1.1.0              
+    ## [3] RNAseqCovarImpute_0.99.10
     ## 
     ## loaded via a namespace (and not attached):
     ##  [1] limma_3.55.5     compiler_4.3.0   tidyselect_1.2.0 Rcpp_1.0.10     

@@ -21,15 +21,9 @@
 #' @param winsor.tail.p Arguments passed to limma::squeezeVar. Numeric vector of length 1 or 2, giving left and right tail proportions of x to Winsorize. Used only when robust=TRUE.
 #'
 #' @importFrom magrittr %>%
-#' @importFrom dplyr select
-#' @importFrom dplyr starts_with
-#' @importFrom dplyr mutate
-#' @importFrom dplyr tibble
-#' @importFrom dplyr arrange
-#' @importFrom stats p.adjust
-#' @importFrom stats pt
-#' @importFrom rlang :=
-#' @importFrom rlang .data
+#' @importFrom dplyr select starts_with mutate tibble arrange
+#' @importFrom stats p.adjust pt
+#' @importFrom rlang := .data
 #' @importFrom limma squeezeVar
 #'
 #' @examples
@@ -39,8 +33,7 @@
 #' gene_bin_impute <- impute_by_gene_bin(example_data,
 #'     intervals,
 #'     example_DGE,
-#'     m = 2,
-#'     param = SerialParam()
+#'     m = 2
 #' )
 #' coef_se <- limmavoom_imputed_data_list(
 #'     gene_intervals = intervals,
@@ -48,8 +41,7 @@
 #'     imputed_data_list = gene_bin_impute,
 #'     m = 2,
 #'     voom_formula = "~x + y + z + a + b",
-#'     predictor = "x",
-#'     param = SerialParam()
+#'     predictor = "x"
 #' )
 #'
 #' final_res <- combine_rubins(

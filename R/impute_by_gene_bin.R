@@ -11,9 +11,10 @@
 #' @param DGE A DGEList object.
 #' @param m Number of imputed data sets.
 #' @param maxit Used by mice function.
-#' @param param Arguments passed to BiocParallel::bpparam()
+#' @param BPPARAM A BiocParallelParam object
 #'
-#' @importFrom BiocParallel bplapply
+#' @include impute_by_gene_bin_helper.R
+#' @importFrom BiocParallel bpparam bplapply
 #' @importFrom magrittr %>%
 #' @importFrom dplyr mutate bind_cols as_tibble
 #' @importFrom foreach %do% foreach
@@ -28,8 +29,7 @@
 #' gene_bin_impute <- impute_by_gene_bin(example_data,
 #'     intervals,
 #'     example_DGE,
-#'     m = 2,
-#'     param = SerialParam()
+#'     m = 2
 #' )
 #' coef_se <- limmavoom_imputed_data_list(
 #'     gene_intervals = intervals,
@@ -37,8 +37,7 @@
 #'     imputed_data_list = gene_bin_impute,
 #'     m = 2,
 #'     voom_formula = "~x + y + z + a + b",
-#'     predictor = "x",
-#'     param = SerialParam()
+#'     predictor = "x"
 #' )
 #'
 #' final_res <- combine_rubins(
@@ -50,7 +49,7 @@
 
 
 # Define the function to perform parallel imputation using bplapply
-impute_by_gene_bin <- function(data, intervals, DGE, m, maxit = 10, param = bpparam()) {
+impute_by_gene_bin <- function(data, intervals, DGE, m, maxit = 10, BPPARAM = bpparam()) {
     # Validity tests
     if (!class(DGE) %in% "DGEList") {
         stop("Input 'DGE' is not a valid DGEList object.")
@@ -68,13 +67,13 @@ impute_by_gene_bin <- function(data, intervals, DGE, m, maxit = 10, param = bppa
     cpm_all <- cpm(DGE, log = TRUE, prior.count = 5)
 
     gene_bin_impute <- bplapply(seq(nrow(intervals)),
-        impute_gene_bin_helper,
         intervals = intervals,
         cpm_all = cpm_all,
         data = data,
         m = m,
         maxit = maxit,
-        BPPARAM = param
+        FUN = impute_gene_bin_helper,
+        BPPARAM = BPPARAM
     )
 
     return(gene_bin_impute)
