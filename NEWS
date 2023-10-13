@@ -17,3 +17,6 @@ Changes in version 0.99.10 (2023-10-06)
 
 Changes in version 0.99.11 (2023-10-06)
 + License to GPL-3
+
+Changes in version 0.99.12 (2023-10-13)
++ limmavoom_imputed_data_list now returns results for all variables in model formula
