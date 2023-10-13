@@ -8,20 +8,19 @@
 #' @param imputed_data_list Output from impute_by_gene_bin.
 #' @param m Number of imputed data sets.
 #' @param voom_formula Formula for design matrix.
-#' @param predictor Independent variable of interest. Must be a variable in voom_formula.
 #'
 #' @include voom_master_lowess.R
 #' @importFrom magrittr %>%
-#' @importFrom dplyr mutate bind_cols as_tibble left_join
+#' @importFrom dplyr mutate bind_cols as_tibble left_join pull
 #' @importFrom foreach %do% foreach
 #' @importFrom edgeR cpm
-#' @importFrom mice mice quickpred
+#' @importFrom mice mice quickpred complete
 #' @importFrom stats model.matrix
 #' @importFrom rlang .data
 #' @importFrom limma normalizeBetweenArrays lmFit
 #'
 #' @keywords internal
-limmavoom_imputed_data_list_helper <- function(gene_bin, gene_intervals, DGE, imputed_data_list, m, voom_formula, predictor, sx_sy) {
+limmavoom_imputed_data_list_helper <- function(gene_bin, gene_intervals, DGE, imputed_data_list, m, voom_formula, sx_sy) {
     # get mean-variance curve from all genes across all M imputations
 
     # get imputed data
@@ -41,29 +40,22 @@ limmavoom_imputed_data_list_helper <- function(gene_bin, gene_intervals, DGE, im
         fit1 <- lmFit(voom1)
 
         # get coefficients unscaled SE, df residual, and sigma from fit1
-        coef <- fit1$coefficients %>%
-            as_tibble() %>%
-            dplyr::select(all_of(starts_with(predictor))) %>%
-            dplyr::rename(coef = all_of(starts_with(predictor)))
-
+        coef <- fit1$coefficients %>% as_tibble()
         SE_unscaled <- fit1$stdev.unscaled * fit1$sigma
-        SE_unscaled <- as_tibble(SE_unscaled) %>%
-            dplyr::select(all_of(starts_with(predictor))) %>%
-            dplyr::rename(SE_unscaled = all_of(starts_with(predictor)))
-
+        SE_unscaled <- as_tibble(SE_unscaled)
         degrees_freedom_residual <- fit1$df.residual
-
         sigma <- fit1$sigma
 
-        output1 <- coef %>%
-            cbind(SE_unscaled) %>%
-            mutate(
-                probe = rownames(fit1),
-                sigma = sigma,
-                df_residual = degrees_freedom_residual
-            )
-        # rename fit values to include info on which imputed data they come from
-        colnames(output1)[colnames(output1) != "probe"] <- paste0(colnames(output1)[colnames(output1) != "probe"], ".", i)
+        output1 = foreach(lm_predictor = seq(coef), .combine = "left_join") %do% {
+          res = tibble(probe = rownames(fit1),
+                       coef = pull(coef[lm_predictor]),
+                       SE_unscaled = pull(SE_unscaled[lm_predictor]),
+                       sigma = sigma[lm_predictor],
+                       df_residual = degrees_freedom_residual)
+          # rename fit values to include info on which imputed data they come from and which contrast from model
+          colnames(res)[colnames(res) != "probe"] <- paste0(colnames(res)[colnames(res) != "probe"], ".", colnames(coef[lm_predictor]), ".", i)
+          res
+        }
         output1
     }
     return(all_coef_se_within_bin)

@@ -8,7 +8,7 @@
 #' @include voom_sx_sy.R
 #'
 #' @keywords internal
-lowess_all_gene_bins <- function(gene_intervals, DGE, imputed_data_list, m, voom_formula, predictor) {
+lowess_all_gene_bins <- function(gene_intervals, DGE, imputed_data_list, m, voom_formula) {
     lowess_all_gene_bins <- foreach(i = seq(m), .combine = "rbind") %do% {
         foreach(gene_bin = seq(length(imputed_data_list)), .combine = "rbind") %do% {
             # Get imputed data for this gene bin and this M imputed dataset

@@ -15,13 +15,13 @@
 #' \item{combined_p_adj_bayes}{false discovery rate (FDR) adjusted combined_p_bayes}
 #' @param DGE A DGEList object.
 #' @param model_results Output from limmavoom_imputed_datalist.
-#' @param voom_formula Formula for design matrix. Should be same formula used to create model_results.
+#' @param predictor Independent variable of interest, in the form of a linear model contrast. Must be a variable in voom_formula.
 #' @param covariate Arguments passed to limma::squeezeVar. If non-NULL, var.prior will depend on this numeric covariate. Otherwise, var.prior is constant.
 #' @param robust Arguments passed to limma::squeezeVar. Llogical, should the estimation of df.prior and var.prior be robustified against outlier sample variances?
 #' @param winsor.tail.p Arguments passed to limma::squeezeVar. Numeric vector of length 1 or 2, giving left and right tail proportions of x to Winsorize. Used only when robust=TRUE.
 #'
 #' @importFrom magrittr %>%
-#' @importFrom dplyr select starts_with mutate tibble arrange
+#' @importFrom dplyr select starts_with mutate tibble arrange contains
 #' @importFrom stats p.adjust pt
 #' @importFrom rlang := .data
 #' @importFrom limma squeezeVar
@@ -40,29 +40,28 @@
 #'     DGE = example_DGE,
 #'     imputed_data_list = gene_bin_impute,
 #'     m = 2,
-#'     voom_formula = "~x + y + z + a + b",
-#'     predictor = "x"
+#'     voom_formula = "~x + y + z + a + b"
 #' )
 #'
 #' final_res <- combine_rubins(
 #'     DGE = example_DGE,
 #'     model_results = coef_se,
-#'     voom_formula = "~x + y + z + a + b"
+#'     predictor = "x"
 #' )
 #' @export
 
 
-combine_rubins <- function(DGE, model_results, voom_formula, covariate = NULL, robust = FALSE, winsor.tail.p = c(0.05, 0.1)) {
+combine_rubins <- function(DGE, model_results, predictor, covariate = NULL, robust = FALSE, winsor.tail.p = c(0.05, 0.1)) {
     # Validity tests
     if (!class(DGE) %in% "DGEList") {
         stop("Input 'DGE' is not a valid DGEList object.")
     }
-    if (!class(as.formula(voom_formula)) %in% c("formula")) {
-        stop()
-    }
     if (!any((class(model_results) %in% c("tbl_df", "tbl", "data.frame")))) {
         stop("Input 'predictor' must be a character")
     }
+    
+    model_results <- model_results %>% dplyr::select(probe, contains(paste0(".", predictor, ".")))
+    colnames(model_results) <- sub(paste0("\\.",predictor, "\\."), ".", colnames(model_results))
     # All residual dfs are the same (n-k-1)
     df_residual <- model_results$df_residual.1
 

@@ -843,10 +843,9 @@ gene_bin_impute <- impute_by_gene_bin(example_data,
 The `limmavoom_imputed_data_list` function loops through the imputed
 data list (output from `impute_by_gene_bin` function) and runs RNA-seq
 analysis with the limma-voom pipeline. Users specify the formula for the
-RNA-seq design matrix and the main predictor of interest for which log
-fold-changes will be estimated. This procedure can also be run with a
-different parallel back-end or in serial using the `BPPARAM` argument as
-above.
+RNA-seq design matrix for which log fold-changes will be estimated. This
+procedure can also be run with a different parallel back-end or in
+serial using the `BPPARAM` argument as above.
 
 ``` r
 coef_se <- limmavoom_imputed_data_list(
@@ -854,38 +853,187 @@ coef_se <- limmavoom_imputed_data_list(
     DGE = example_DGE,
     imputed_data_list = gene_bin_impute,
     m = 3,
-    voom_formula = "~x + y + z + a + b",
-    predictor = "x"
+    voom_formula = "~x + y + z + a + b"
 )
 ```
 
     ## Joining with `by = join_by(probe)`
     ## Joining with `by = join_by(probe)`
-    ## 
     ## Joining with `by = join_by(probe)`
     ## Joining with `by = join_by(probe)`
-    ## 
     ## Joining with `by = join_by(probe)`
     ## Joining with `by = join_by(probe)`
-    ## 
     ## Joining with `by = join_by(probe)`
     ## Joining with `by = join_by(probe)`
-    ## 
     ## Joining with `by = join_by(probe)`
     ## Joining with `by = join_by(probe)`
-    ## 
     ## Joining with `by = join_by(probe)`
     ## Joining with `by = join_by(probe)`
-    ## 
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
     ## Joining with `by = join_by(probe)`
     ## Joining with `by = join_by(probe)`
     ## 
     ## Joining with `by = join_by(probe)`
     ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
     ## 
     ## Joining with `by = join_by(probe)`
     ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
     ## 
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## 
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## 
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## 
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## 
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## 
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## 
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
+    ## Joining with `by = join_by(probe)`
     ## Joining with `by = join_by(probe)`
     ## Joining with `by = join_by(probe)`
 
@@ -898,28 +1046,33 @@ function applies the `squeezeVar` function before pooling results. The
 result is a table with one row per gene. The table includes coefficients
 (e.g., logFC values) standard errors, degrees of freedom, t-statistics,
 P-Values, and adjusted P-values from the limma-voom pipeline. Both the
-raw and empirical Bayes moderated statistics are reported.
+raw and empirical Bayes moderated statistics are reported. The user
+selects the predictor of interest in the form of a linear model contrast
+for which model results will be extracted. For a continuous variable
+this is just the predictor name. For a categorical variable like `b` in
+`example_data` we could specify `predictor = b1` to get the effect of
+being in the b = 1 versus the b = 0 group.
 
 ``` r
 final_res <- combine_rubins(
     DGE = example_DGE,
     model_results = coef_se,
-    voom_formula = "~x + y + z + a + b"
+    predictor = "x"
 )
 ```
 
 | probe  | coef_combined | combined_p_bayes | combined_p_adj_bayes |
 |:-------|--------------:|-----------------:|---------------------:|
-| ENS432 |        -0.021 |            0.000 |                0.099 |
-| ENS65  |        -0.023 |            0.002 |                0.416 |
-| ENS239 |         0.015 |            0.007 |                0.828 |
-| ENS327 |        -0.010 |            0.007 |                0.828 |
-| ENS411 |         0.022 |            0.011 |                0.969 |
-| ENS260 |         0.011 |            0.014 |                0.969 |
-| ENS107 |         0.007 |            0.021 |                0.969 |
-| ENS219 |         0.013 |            0.022 |                0.969 |
-| ENS458 |         0.015 |            0.022 |                0.969 |
-| ENS13  |        -0.022 |            0.024 |                0.969 |
+| ENS432 |        -0.021 |            0.000 |                0.121 |
+| ENS65  |        -0.022 |            0.002 |                0.447 |
+| ENS327 |        -0.010 |            0.006 |                0.981 |
+| ENS239 |         0.014 |            0.009 |                0.981 |
+| ENS411 |         0.022 |            0.011 |                0.981 |
+| ENS260 |         0.011 |            0.014 |                0.981 |
+| ENS458 |         0.015 |            0.022 |                0.981 |
+| ENS219 |         0.012 |            0.025 |                0.981 |
+| ENS291 |         0.016 |            0.026 |                0.981 |
+| ENS13  |        -0.022 |            0.027 |                0.981 |
 
 The top 10 genes associated with predictor x sorted by lowest P-value
 
@@ -947,7 +1100,7 @@ The top 10 genes associated with predictor x sorted by lowest P-value
     ## 
     ## other attached packages:
     ## [1] BiocParallel_1.33.9       dplyr_1.1.0              
-    ## [3] RNAseqCovarImpute_0.99.10
+    ## [3] RNAseqCovarImpute_0.99.12
     ## 
     ## loaded via a namespace (and not attached):
     ##  [1] limma_3.55.5     compiler_4.3.0   tidyselect_1.2.0 Rcpp_1.0.10     

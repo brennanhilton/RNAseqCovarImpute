@@ -15,13 +15,12 @@ test_that("consistent results", {
         imputed_data_list = gene_bin_impute,
         m = 2,
         voom_formula = "~x + y + z + a + b",
-        predictor = "x",
         BPPARAM = SerialParam(RNGseed = 2023)
     )
     final_res <- combine_rubins(
         DGE = example_DGE,
         model_results = coef_se,
-        voom_formula = "~x + y + z + a + b"
+        predictor = "x"
     )
     expect_equal(final_res$coef_combined[1], -0.02099867, tolerance = 0.001)
 })

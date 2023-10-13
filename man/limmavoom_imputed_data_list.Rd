@@ -10,7 +10,6 @@ limmavoom_imputed_data_list(
   imputed_data_list,
   m,
   voom_formula,
-  predictor,
   BPPARAM = bpparam()
 )
 }
@@ -24,8 +23,6 @@ limmavoom_imputed_data_list(
 \item{m}{Number of imputed data sets.}
 
 \item{voom_formula}{Formula for design matrix.}
-
-\item{predictor}{Independent variable of interest. Must be a variable in voom_formula}
 
 \item{BPPARAM}{A BiocParallelParam object}
 }
@@ -50,13 +47,12 @@ coef_se <- limmavoom_imputed_data_list(
     DGE = example_DGE,
     imputed_data_list = gene_bin_impute,
     m = 2,
-    voom_formula = "~x + y + z + a + b",
-    predictor = "x"
+    voom_formula = "~x + y + z + a + b"
 )
 
 final_res <- combine_rubins(
     DGE = example_DGE,
     model_results = coef_se,
-    voom_formula = "~x + y + z + a + b"
+    predictor = "x"
 )
 }

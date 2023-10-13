@@ -89,26 +89,25 @@ gene_bin_impute <- impute_by_gene_bin(example_data,
 ```
 ## Estimate gene expression changes using voom followed by lmFit functions, separately on each M imputed dataset within each gene bin
 
-The `limmavoom_imputed_data_list` function loops through the imputed data list (output from `impute_by_gene_bin` function) and runs RNA-seq analysis with the limma-voom pipeline. Users specify the formula for the RNA-seq design matrix and the main predictor of interest for which log fold-changes will be estimated. This procedure can also be run with a different parallel back-end or in serial using the `BPPARAM` argument as above. 
+The `limmavoom_imputed_data_list` function loops through the imputed data list (output from `impute_by_gene_bin` function) and runs RNA-seq analysis with the limma-voom pipeline. Users specify the formula for the RNA-seq design matrix for which log fold-changes will be estimated. This procedure can also be run with a different parallel back-end or in serial using the `BPPARAM` argument as above. 
 ```{r}
 coef_se <- limmavoom_imputed_data_list(
     gene_intervals = intervals,
     DGE = example_DGE,
     imputed_data_list = gene_bin_impute,
     m = 3,
-    voom_formula = "~x + y + z + a + b",
-    predictor = "x"
+    voom_formula = "~x + y + z + a + b"
 )
 ```
 
 ## Apply variance shrinking Bayesian procedure, pooling results with Rubins’ rules, and FDR-adjust P-values
 
-The final step is to combine the results from each imputed dataset using Rubin's rules. The argument "model_results" is the output from the `limmavoom_imputed_data_list` function above. The `combine_rubins` function applies the `squeezeVar` function before pooling results. The result is a table with one row per gene. The table includes coefficients (e.g., logFC values) standard errors, degrees of freedom, t-statistics, P-Values, and adjusted P-values from the limma-voom pipeline. Both the raw and empirical Bayes moderated statistics are reported.
+The final step is to combine the results from each imputed dataset using Rubin's rules. The argument "model_results" is the output from the `limmavoom_imputed_data_list` function above. The `combine_rubins` function applies the `squeezeVar` function before pooling results. The result is a table with one row per gene. The table includes coefficients (e.g., logFC values) standard errors, degrees of freedom, t-statistics, P-Values, and adjusted P-values from the limma-voom pipeline. Both the raw and empirical Bayes moderated statistics are reported. The user selects the predictor of interest in the form of a linear model contrast for which model results will be extracted. For a continuous variable this is just the predictor name. For a categorical variable like `b` in `example_data` we could specify `predictor = b1` to get the effect of being in the b = 1 versus the b = 0 group.
 ```{r}
 final_res <- combine_rubins(
     DGE = example_DGE,
     model_results = coef_se,
-    voom_formula = "~x + y + z + a + b"
+    predictor = "x"
 )
 ```
 

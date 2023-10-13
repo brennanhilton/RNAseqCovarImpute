@@ -4,14 +4,7 @@
 \alias{lowess_all_gene_bins}
 \title{lowess_all_gene_bins}
 \usage{
-lowess_all_gene_bins(
-  gene_intervals,
-  DGE,
-  imputed_data_list,
-  m,
-  voom_formula,
-  predictor
-)
+lowess_all_gene_bins(gene_intervals, DGE, imputed_data_list, m, voom_formula)
 }
 \value{
 All sx and sy values for lowess function across all M imputations.

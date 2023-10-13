@@ -7,7 +7,7 @@
 combine_rubins(
   DGE,
   model_results,
-  voom_formula,
+  predictor,
   covariate = NULL,
   robust = FALSE,
   winsor.tail.p = c(0.05, 0.1)
@@ -18,7 +18,7 @@ combine_rubins(
 
 \item{model_results}{Output from limmavoom_imputed_datalist.}
 
-\item{voom_formula}{Formula for design matrix. Should be same formula used to create model_results.}
+\item{predictor}{Independent variable of interest, in the form of a linear model contrast. Must be a variable in voom_formula.}
 
 \item{covariate}{Arguments passed to limma::squeezeVar. If non-NULL, var.prior will depend on this numeric covariate. Otherwise, var.prior is constant.}
 
@@ -57,13 +57,12 @@ coef_se <- limmavoom_imputed_data_list(
     DGE = example_DGE,
     imputed_data_list = gene_bin_impute,
     m = 2,
-    voom_formula = "~x + y + z + a + b",
-    predictor = "x"
+    voom_formula = "~x + y + z + a + b"
 )
 
 final_res <- combine_rubins(
     DGE = example_DGE,
     model_results = coef_se,
-    voom_formula = "~x + y + z + a + b"
+    predictor = "x"
 )
 }

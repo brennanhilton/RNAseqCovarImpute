@@ -8,14 +8,13 @@
 #' @param imputed_data_list Output from impute_by_gene_bin.
 #' @param m Number of imputed data sets.
 #' @param voom_formula Formula for design matrix.
-#' @param predictor Independent variable of interest. Must be a variable in voom_formula
 #' @param BPPARAM A BiocParallelParam object
 #'
 #' @include limmavoom_imputed_data_list_helper.R
 #' @include lowess_all_gene_bins.R
 #' @importFrom BiocParallel bpparam bplapply
 #' @importFrom magrittr %>%
-#' @importFrom dplyr mutate select rename as_tibble all_of bind_cols as_tibble
+#' @importFrom dplyr mutate select rename as_tibble all_of bind_cols as_tibble pull
 #' @importFrom foreach %do% foreach
 #' @importFrom edgeR cpm
 #' @importFrom mice complete
@@ -38,19 +37,18 @@
 #'     DGE = example_DGE,
 #'     imputed_data_list = gene_bin_impute,
 #'     m = 2,
-#'     voom_formula = "~x + y + z + a + b",
-#'     predictor = "x"
+#'     voom_formula = "~x + y + z + a + b"
 #' )
 #'
 #' final_res <- combine_rubins(
 #'     DGE = example_DGE,
 #'     model_results = coef_se,
-#'     voom_formula = "~x + y + z + a + b"
+#'     predictor = "x"
 #' )
 #' @export
 
 
-limmavoom_imputed_data_list <- function(gene_intervals, DGE, imputed_data_list, m, voom_formula, predictor, BPPARAM = bpparam()) {
+limmavoom_imputed_data_list <- function(gene_intervals, DGE, imputed_data_list, m, voom_formula, BPPARAM = bpparam()) {
     # Validity tests
     if (!class(DGE) %in% "DGEList") {
         stop("Input 'DGE' is not a valid DGEList object.")
@@ -61,11 +59,9 @@ limmavoom_imputed_data_list <- function(gene_intervals, DGE, imputed_data_list, 
     if (!class(as.formula(voom_formula)) %in% c("formula")) {
         stop()
     }
-    if (!(class(predictor) %in% c("character"))) {
-        stop("Input 'predictor' must be a character")
-    }
+
     # Get mean-variance curve from all genes across all M imputations
-    sx_sy <- lowess_all_gene_bins(gene_intervals, DGE, imputed_data_list, m, voom_formula, predictor)
+    sx_sy <- lowess_all_gene_bins(gene_intervals, DGE, imputed_data_list, m, voom_formula)
 
     # Parallelize the loop using bplapply
     all_coefs_se <- bplapply(seq(length(imputed_data_list)),
@@ -74,7 +70,6 @@ limmavoom_imputed_data_list <- function(gene_intervals, DGE, imputed_data_list, 
         imputed_data = imputed_data_list,
         DGE = DGE,
         voom_formula = voom_formula,
-        predictor = predictor,
         sx_sy = sx_sy,
         FUN = limmavoom_imputed_data_list_helper,
         BPPARAM = BPPARAM

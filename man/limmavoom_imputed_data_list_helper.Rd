@@ -11,7 +11,6 @@ limmavoom_imputed_data_list_helper(
   imputed_data_list,
   m,
   voom_formula,
-  predictor,
   sx_sy
 )
 }
@@ -25,8 +24,6 @@ limmavoom_imputed_data_list_helper(
 \item{m}{Number of imputed data sets.}
 
 \item{voom_formula}{Formula for design matrix.}
-
-\item{predictor}{Independent variable of interest. Must be a variable in voom_formula.}
 }
 \value{
 A dataframe with coefficient, standard error, sigma, and residual degrees of freedom values from limma-voom gene expression analysis. One row per gene and one set of values per imputed dataset.

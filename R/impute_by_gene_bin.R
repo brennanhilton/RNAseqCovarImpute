@@ -36,14 +36,13 @@
 #'     DGE = example_DGE,
 #'     imputed_data_list = gene_bin_impute,
 #'     m = 2,
-#'     voom_formula = "~x + y + z + a + b",
-#'     predictor = "x"
+#'     voom_formula = "~x + y + z + a + b"
 #' )
 #'
 #' final_res <- combine_rubins(
 #'     DGE = example_DGE,
 #'     model_results = coef_se,
-#'     voom_formula = "~x + y + z + a + b"
+#'     predictor = "x"
 #' )
 #' @export
 
