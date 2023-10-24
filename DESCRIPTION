@@ -1,6 +1,6 @@
 Package: RNAseqCovarImpute
 Title: Impute Covariate Data in RNA Sequencing Studies
-Version: 1.0.0
+Version: 1.1.0
 Authors@R: c(
     person("Brennan", "Baker", email = "brennanhilton@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-5459-9141")),
