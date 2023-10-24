@@ -50,7 +50,7 @@ limmavoom_imputed_data_list_helper <- function(gene_bin, gene_intervals, DGE, im
           res = tibble(probe = rownames(fit1),
                        coef = pull(coef[lm_predictor]),
                        SE_unscaled = pull(SE_unscaled[lm_predictor]),
-                       sigma = sigma[lm_predictor],
+                       sigma = sigma,
                        df_residual = degrees_freedom_residual)
           # rename fit values to include info on which imputed data they come from and which contrast from model
           colnames(res)[colnames(res) != "probe"] <- paste0(colnames(res)[colnames(res) != "probe"], ".", colnames(coef[lm_predictor]), ".", i)
