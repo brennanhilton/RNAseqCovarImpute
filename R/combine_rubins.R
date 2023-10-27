@@ -21,10 +21,11 @@
 #' @param winsor.tail.p Arguments passed to limma::squeezeVar. Numeric vector of length 1 or 2, giving left and right tail proportions of x to Winsorize. Used only when robust=TRUE.
 #'
 #' @importFrom magrittr %>%
-#' @importFrom dplyr select starts_with mutate tibble arrange contains
+#' @importFrom dplyr select starts_with mutate tibble arrange contains pull
 #' @importFrom stats p.adjust pt
 #' @importFrom rlang := .data
 #' @importFrom limma squeezeVar
+#' @importFrom foreach foreach %do%
 #'
 #' @examples
 #' data(example_data)
@@ -111,7 +112,7 @@ combine_rubins <- function(DGE, model_results, predictor, covariate = NULL, robu
     # This way we get one set of priors rather than different prior per block of genes.
     priors <- foreach(i = seq(ncol(all_sigma)), .combine = "cbind") %do% {
         # Get sigma and std dev for ith imputed dataset
-        sigma_i <- all_sigma[, i]
+        sigma_i <- all_sigma[, i] %>% pull()
         std_dev_i <- all_std_dev[, i]
 
         # Get the priors!
