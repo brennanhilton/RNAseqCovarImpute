@@ -46,23 +46,24 @@ get_gene_bin_intervals <- function(DGE, data, n = 10) {
         stop("Input 'n' must be numeric.")
     }
 
-    gene_number <- as.numeric(nrow(DGE))
-    genes_per_bin <- floor(nrow(data) / n) # Recommended 10 to 1 individuals to genes ratio so default n is 10
-    bins <- floor(gene_number / genes_per_bin)
-    gene_remainder <- gene_number %% bins
-    # When gene_number is not divisible by genes_per_bin, intervals1 will have all the larger gene bins,
-    # and intervals2 will have all the smaller gene bins. e.g. if you have 11 genes, 5 genes per bin,
-    # and 2 bins, intevals1 will have the first bin of 6 and intervals2 will have the last bin of 5.
-    # When number of genes per bin evenly divides into gene_number, intervals1 will be empty
-    intervals1 <- tibble(
-        start = seq(from = 1, by = genes_per_bin + 1, length.out = gene_remainder),
-        end = seq(from = genes_per_bin + 1, by = genes_per_bin + 1, length.out = gene_remainder)
-    )
-
-    intervals2 <- tibble(
-        start = seq(from = 1 + gene_remainder * (genes_per_bin + 1), by = genes_per_bin, length.out = bins - gene_remainder),
-        end = seq(from = genes_per_bin + gene_remainder * (genes_per_bin + 1), by = genes_per_bin, length.out = bins - gene_remainder)
-    )
-
-    intervals <- rbind(intervals1, intervals2) %>% mutate(number = 1 + end - start)
+    gene_number <- as.numeric(nrow(mat))
+    genes_per_bin <- floor(nrow(ampute_i)/n)
+    num_bins <- floor(gene_number/genes_per_bin)
+    remainder = gene_number - (genes_per_bin*num_bins)
+    
+    # Initialize the bins with the lowest possible genes_per_bin
+    bins <- rep(genes_per_bin, num_bins)
+    
+    # Distribute the remainder evenly across the bins
+    i <- 1
+    while (remainder > 0) {
+        bins[i] <- bins[i] + 1
+        remainder <- remainder - 1
+        i <- i %% num_bins + 1 #bump i to the next bin, can also go back to bin 1
+    }
+  
+    # Calculate the start and end genes for each bin
+    start_genes <- c(1, cumsum(bins[-num_bins]) + 1)
+    end_genes <- cumsum(bins)
+    output <- data.frame(start = start_genes, end = end_genes, number = bins)
 }

@@ -58,7 +58,7 @@ combine_rubins <- function(DGE, model_results, predictor, covariate = NULL, robu
         stop("Input 'DGE' is not a valid DGEList object.")
     }
     if (!any((class(model_results) %in% c("tbl_df", "tbl", "data.frame")))) {
-        stop("Input 'predictor' must be a character")
+        stop("Input 'model_results' is not a valid data.frame, tbl, or tbl_df object.")
     }
     
     model_results <- model_results %>% dplyr::select(probe, contains(paste0(".", predictor, ".")))
