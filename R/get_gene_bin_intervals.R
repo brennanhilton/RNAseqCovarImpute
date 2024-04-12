@@ -46,8 +46,8 @@ get_gene_bin_intervals <- function(DGE, data, n = 10) {
         stop("Input 'n' must be numeric.")
     }
 
-    gene_number <- as.numeric(nrow(mat))
-    genes_per_bin <- floor(nrow(ampute_i)/n)
+    gene_number <- as.numeric(nrow(DGE))
+    genes_per_bin <- floor(nrow(data)/n)
     num_bins <- floor(gene_number/genes_per_bin)
     remainder = gene_number - (genes_per_bin*num_bins)
     
