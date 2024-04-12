@@ -20,3 +20,18 @@ Changes in version 0.99.11 (2023-10-06)
 
 Changes in version 0.99.12 (2023-10-13)
 + limmavoom_imputed_data_list now returns results for all variables in model formula
+
+Changes in version 1.0.1 (2023-10-26)
++ fixed bug in limmavoom_imputed_data_list_helper function where sigma values were not properly output
+
+Changes in version 1.0.2 (2023-10-26)
++ fixed bug in combine_rubins where sigma values were not properly made into a numeric vector
+
+Changes in version 1.1.3 (2024-04-12)
++ fixed bug in get_gene_bin_intervals where all genes were not included in some cases
++ fixed bug where dfs were Inf in cases where information loss due to missingness (lambda) was 0
++ Added MI PCA method where we 1) perform PCA on the log CPM values for all genes, 2) create M
+  imputed datasets where the imputation predictor matrix includes all covariates and the optimum
+  number of PCs to retain (e.g., based on Horn’s parallel analysis or the number of PCs that account
+  for >80% explained variation), 3) conduct the standard limma-voom pipeline on each M imputed dataset,
+  and 4) pool the results with Rubins’ rules to produce combined coefficients, standard errors, and P-values

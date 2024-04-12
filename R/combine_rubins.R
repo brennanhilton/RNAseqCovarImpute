@@ -58,7 +58,7 @@ combine_rubins <- function(DGE, model_results, predictor, covariate = NULL, robu
         stop("Input 'DGE' is not a valid DGEList object.")
     }
     if (!any((class(model_results) %in% c("tbl_df", "tbl", "data.frame")))) {
-        stop("Input 'predictor' must be a character")
+        stop("Input 'model_results' is not a valid data.frame, tbl, or tbl_df object.")
     }
     
     model_results <- model_results %>% dplyr::select(probe, contains(paste0(".", predictor, ".")))
@@ -95,7 +95,9 @@ combine_rubins <- function(DGE, model_results, predictor, covariate = NULL, robu
     DFobs <- (((df_residual) + 1) / ((df_residual) + 3)) * (df_residual) * (1 - lambda)
     # The equation below is the residual degrees of freedom from voom and lmfit adjusted for rubins rules.
     df <- (DFold * DFobs) / (DFold + DFobs)
-
+    if(is.nan(df[[1]])){ #if information lost (lambda) is 0,df will be nan
+      df <- df_residual # in this case we use the original df unadjusted
+    }
     #######################
     #######################
     ## eBayes part ########
@@ -154,7 +156,9 @@ combine_rubins <- function(DGE, model_results, predictor, covariate = NULL, robu
     DFobs <- (((df_residual + df_prior) + 1) / ((df_residual + df_prior) + 3)) * (df_residual + df_prior) * (1 - lambda_bayes)
     # The equation below is the residual degrees of freedom from voom and lmfit adjusted for rubins rules.
     df_bayes <- (DFold * DFobs) / (DFold + DFobs)
-
+    if(is.nan(df_bayes[[1]])){ #if information lost (lambda) is 0,df will be nan
+      df <- df_residual + df_prior # in this case we use the original df unadjusted
+    }
     # Get the final results!
     rubins_t <- tibble(probe = model_results$probe, coef_combined = coefs_combined$coef_pooled, SE_p = SE_p, SE_p_bayes = SE_p_bayes, df = df, df_bayes = df_bayes) %>%
         mutate(
