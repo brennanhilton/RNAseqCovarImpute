@@ -35,3 +35,6 @@ Changes in version 1.1.3 (2024-04-12)
   number of PCs to retain (e.g., based on Horn’s parallel analysis or the number of PCs that account
   for >80% explained variation), 3) conduct the standard limma-voom pipeline on each M imputed dataset,
   and 4) pool the results with Rubins’ rules to produce combined coefficients, standard errors, and P-values
+
+Changes in version 1.1.4 (2024-04-29)
++ bug fix above where dfs were Inf fixed for df AND df_bayes

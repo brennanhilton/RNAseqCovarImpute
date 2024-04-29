@@ -157,7 +157,7 @@ combine_rubins <- function(DGE, model_results, predictor, covariate = NULL, robu
     # The equation below is the residual degrees of freedom from voom and lmfit adjusted for rubins rules.
     df_bayes <- (DFold * DFobs) / (DFold + DFobs)
     if(is.nan(df_bayes[[1]])){ #if information lost (lambda) is 0,df will be nan
-      df <- df_residual + df_prior # in this case we use the original df unadjusted
+      df_bayes <- df_residual + df_prior # in this case we use the original df unadjusted
     }
     # Get the final results!
     rubins_t <- tibble(probe = model_results$probe, coef_combined = coefs_combined$coef_pooled, SE_p = SE_p, SE_p_bayes = SE_p_bayes, df = df, df_bayes = df_bayes) %>%
