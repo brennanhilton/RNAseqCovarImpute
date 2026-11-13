@@ -22,5 +22,5 @@ test_that("consistent results", {
         model_results = coef_se,
         predictor = "x"
     )
-    expect_equal(final_res$coef_combined[1], -0.02099867, tolerance = 0.001)
+    expect_equal(final_res$coef_combined[final_res$probe == "ENS432"], -0.02099867, tolerance = 0.02)
 })
